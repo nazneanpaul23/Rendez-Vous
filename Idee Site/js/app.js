@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let terenuriDinDB = []; 
     let sportCurent = "", terenCurent = "", pretTerenCurent = 0, pretMingeCurent = 15;
     let mingeBifata = false, oraSelectata = [], dataSelectataStr = "";
+    let esteZiuaDeAzi = false; // MODIFICARE 1: Variabilă pentru a ști dacă suntem în ziua curentă
 
     async function incarcaTerenuri() {
         const { data, error } = await db.from('terenuri').select('*');
@@ -90,14 +91,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let afisate = 0;
         data.sort((a, b) => b.id - a.id).forEach((r) => {
-            // Dacă apasă pe Active, sărim peste cele anulate
             if (tip === 'active' && r.stare === 'anulata') return;
             
             afisate++;
             const textAnulat = r.stare === 'anulata' ? '<span style="color: #ef4444; font-weight: bold;">[ANULATĂ]</span>' : '';
             const butonAnulare = (tip === 'active' && r.stare !== 'anulata') ? `<button class="btn-anulare anulare-client" data-id="${r.id}" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">❌ Anulează (Gratuit)</button>` : '';
 
-            // Extragem link-ul din DB pentru a vizualiza harta
             const terenAsociat = terenuriDinDB.find(t => t.nume === r.teren);
             const linkLocatie = (terenAsociat && terenAsociat.locatie) ? terenAsociat.locatie : '';
             const onClickLocatie = linkLocatie ? `window.open('${linkLocatie}', '_blank')` : `alert('Locația nu este disponibilă.')`;
@@ -199,6 +198,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnZi.addEventListener('click', () => {
                 document.querySelectorAll('.btn-zi').forEach(b => b.classList.remove('selectat')); btnZi.classList.add('selectat');
                 dataSelectataStr = `${ziTextDB}, ${ziNumar}.${lunaNumar}`;
+                
+                // MODIFICARE 2: Salvăm dacă utilizatorul a apăsat pe butonul de "Azi" (index 0)
+                esteZiuaDeAzi = (i === 0); 
+                
                 incarcaOreDinSupabase();
             });
             containerZile.appendChild(btnZi);
@@ -215,14 +218,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             .select('ora').eq('teren', terenCurent).eq('data_str', dataSelectataStr).neq('stare', 'anulata');
 
         let oreOcupateArray = rezervariOcupate ? rezervariOcupate.map(r => r.ora) : [];
+        
+        // MODIFICARE 3: Aflăm ora curentă de pe telefonul clientului
+        const oraCurenta = new Date().getHours(); 
 
         containerOre.innerHTML = '';
         for (let i = 12; i <= 22; i++) {
             let oraTxt = `${i}:00`; let btnOra = document.createElement('button');
             btnOra.className = 'btn-ora'; btnOra.innerText = oraTxt;
 
-            if (oreOcupateArray.includes(oraTxt)) {
-                btnOra.classList.add('ocupat'); btnOra.innerText += " (Ocupat)";
+            // Logica inteligentă: Blocăm dacă e în baza de date SAU dacă e azi și ora a trecut deja
+            if (oreOcupateArray.includes(oraTxt) || (esteZiuaDeAzi && i <= oraCurenta)) {
+                btnOra.classList.add('ocupat'); 
+                // Punem un text diferit să știe clientul de ce nu poate apăsa
+                btnOra.innerText += oreOcupateArray.includes(oraTxt) ? " (Ocupat)" : " (Trecut)";
             } else {
                 btnOra.addEventListener('click', () => toggleOra(btnOra, oraTxt));
             }
