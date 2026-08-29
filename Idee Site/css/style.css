@@ -138,91 +138,50 @@ input:checked + .slider:before { transform: translateX(22px); }
 @media (max-width: 600px) { .buton-top-cont { top: 15px; left: 15px; padding: 10px 16px; font-size: 14px; } }
 
 /* Corectare aliniere Zile și Ore în fereastra de rezervare */
-#container-zile {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    margin-top: 10px;
-    padding-bottom: 5px;
-}
-
-.btn-zi {
-    flex: 1;
-    min-width: 50px;
-    padding: 8px 4px;
-    font-size: 12px;
-    text-align: center;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    cursor: pointer;
-}
-
-.btn-zi.selectat {
-    background: #22c55e !important;
-    border-color: #22c55e;
-    font-weight: bold;
-}
-
-#container-ore {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.btn-ora {
-    padding: 10px;
-    font-size: 14px;
-    text-align: center;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    cursor: pointer;
-}
-
-.btn-ora.selectat {
-    background: #22c55e !important;
-    border-color: #22c55e;
-    font-weight: bold;
-}
-
-.btn-ora.ocupat {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: #ef4444;
-    color: #ef4444;
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-/* Tot ce e între aceste acolade se aplică DOAR pe ecrane mici (sub 768px - telefoane) */
+/* ========================================================= */
+/* ADAPTARE PENTRU TELEFOANE (Se aplică doar sub 768px lățime) */
+/* ========================================================= */
 @media (max-width: 768px) {
+    /* 1. Blocăm mișcarea stânga-dreapta a ecranului */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* 2. Containerul cu cele 4 sporturi împărțit perfect în 2 coloane */
+    .grila-sporturi {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 3. Cardul de sport adaptat (am micșorat padding-ul uriaș de pe desktop ca să încapă mingea și textul) */
+    .card-sport {
+        width: 100% !important;
+        margin: 0;
+        padding: 20px 10px; 
+        box-sizing: border-box;
+    }
+
+    /* 4. Iconița cu mingea micșorată puțin proporțional pentru ecranul mic */
+    .iconita-minge {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 10px;
+    }
+
+    /* Regulile tale anterioare pentru terenuri */
     .container-terenuri {
-        display: block; /* sau flex-direction: column; pentru a le pune pe verticală */
+        display: block;
     }
     
     .buton-rezerva {
-        width: 100%; /* Întinde butoanele pe toată lățimea ecranului pentru a fi ușor de apăsat cu degetul */
-        padding: 15px;
-    }
-    
-    body {
-        margin: 10px; /* Reduci marginile mari de pe desktop pentru a câștiga spațiu util */
-    }
-}
-@media (max-width: 768px) {
-    body {
-        overflow-x: hidden; /* Previne mișcarea enervantă a site-ului stânga-dreapta */
-    }
-
-    .clasa-ta-pentru-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Le împarte exact la jumătate din ecran */
-        gap: 15px;
-        padding: 10px;
         width: 100%;
-        box-sizing: border-box;
+        padding: 15px;
     }
 }
