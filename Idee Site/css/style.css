@@ -196,3 +196,19 @@ input:checked + .slider:before { transform: translateX(22px); }
     cursor: not-allowed;
     text-decoration: line-through;
 }
+
+/* Tot ce e între aceste acolade se aplică DOAR pe ecrane mici (sub 768px - telefoane) */
+@media (max-width: 768px) {
+    .container-terenuri {
+        display: block; /* sau flex-direction: column; pentru a le pune pe verticală */
+    }
+    
+    .buton-rezerva {
+        width: 100%; /* Întinde butoanele pe toată lățimea ecranului pentru a fi ușor de apăsat cu degetul */
+        padding: 15px;
+    }
+    
+    body {
+        margin: 10px; /* Reduci marginile mari de pe desktop pentru a câștiga spațiu util */
+    }
+}
