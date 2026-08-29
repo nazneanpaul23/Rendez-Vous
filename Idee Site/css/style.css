@@ -1,35 +1,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; }
 
-/* 1. Previne marginile albe/gri la scroll */
-html {
-    background-color: #030303;
-}
-
-body {
-    background-color: transparent; 
+/* 1. Forțează marginile telefonului (sus la ceas și jos) să fie negre intens */
+html, body {
+    background-color: #030303 !important;
     width: 100%;
-    min-height: 100dvh;
+    min-height: 100%;
 }
 
-/* 2. Tapetul animat: întins forțat sub bara de sus și de jos a telefonului */
-body::before {
-    content: "";
-    position: fixed;
-    /* Schimbarea critică: Extindem animația dincolo de marginile vizibile */
-    top: -50px;
-    bottom: -50px;
-    left: 0;
-    right: 0;
-    z-index: -1;
-    background-color: #030303;
-    background-image: 
-        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(88, 78, 20, 0.189) 50%, transparent 85%),
-        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 50%);
-    background-size: 250% 250%; 
-    animation: miscareLuminaDapta 10s ease infinite alternate;
-}
-
-/* 3. Containerul principal rămâne transparent pentru a lăsa tapetul să strălucească */
+/* 2. Containerul ține conținutul, dar devine transparent */
 .fundal-water { 
     width: 100%; 
     min-height: 100dvh; 
@@ -38,7 +16,25 @@ body::before {
     align-items: center; 
     justify-content: center; 
     position: relative; 
-    background: transparent; 
+    z-index: 1; /* Asigură că butoanele pot fi apăsate */
+}
+
+/* 3. ADEVĂRATUL TAPET: Ancorat forțat de marginile fizice ale ecranului. Safari nu mai poate tăia asta. */
+.fundal-water::before {
+    content: "";
+    position: fixed;
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0; 
+    z-index: -1; /* Trimis garantat în spatele butoanelor */
+    background-color: #030303;
+    background-image: 
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(88, 78, 20, 0.189) 50%, transparent 85%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 50%);
+    background-size: 250% 250%; 
+    animation: miscareLuminaDapta 10s ease infinite alternate;
+    pointer-events: none;
 }
 
 @keyframes miscareLuminaDapta { 
