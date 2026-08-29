@@ -4,7 +4,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     let terenuriDinDB = []; 
     let sportCurent = "", terenCurent = "", pretTerenCurent = 0, pretMingeCurent = 15;
     let mingeBifata = false, oraSelectata = [], dataSelectataStr = "";
-    let esteZiuaDeAzi = false; // MODIFICARE 1: Variabilă pentru a ști dacă suntem în ziua curentă
+
+    // 1. Calculăm o singură dată șirul exact pentru ziua de azi (ex: "Sâm, 29.08") pentru siguranță maximă
+    const aziD = new Date();
+    const numeZileT = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+    const aziStringFormatat = `${numeZileT[aziD.getDay()]}, ${String(aziD.getDate()).padStart(2, '0')}.${String(aziD.getMonth() + 1).padStart(2, '0')}`;
 
     async function incarcaTerenuri() {
         const { data, error } = await db.from('terenuri').select('*');
@@ -198,10 +202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnZi.addEventListener('click', () => {
                 document.querySelectorAll('.btn-zi').forEach(b => b.classList.remove('selectat')); btnZi.classList.add('selectat');
                 dataSelectataStr = `${ziTextDB}, ${ziNumar}.${lunaNumar}`;
-                
-                // MODIFICARE 2: Salvăm dacă utilizatorul a apăsat pe butonul de "Azi" (index 0)
-                esteZiuaDeAzi = (i === 0); 
-                
                 incarcaOreDinSupabase();
             });
             containerZile.appendChild(btnZi);
@@ -219,18 +219,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let oreOcupateArray = rezervariOcupate ? rezervariOcupate.map(r => r.ora) : [];
         
-        // MODIFICARE 3: Aflăm ora curentă de pe telefonul clientului
         const oraCurenta = new Date().getHours(); 
+        
+        // Verificăm dacă șirul selectat de client este IDENTIC cu șirul zilei de azi generat la pasul 1
+        const esteZiuaDeAzi = (dataSelectataStr === aziStringFormatat);
 
         containerOre.innerHTML = '';
         for (let i = 12; i <= 22; i++) {
             let oraTxt = `${i}:00`; let btnOra = document.createElement('button');
             btnOra.className = 'btn-ora'; btnOra.innerText = oraTxt;
 
-            // Logica inteligentă: Blocăm dacă e în baza de date SAU dacă e azi și ora a trecut deja
             if (oreOcupateArray.includes(oraTxt) || (esteZiuaDeAzi && i <= oraCurenta)) {
                 btnOra.classList.add('ocupat'); 
-                // Punem un text diferit să știe clientul de ce nu poate apăsa
+                btnOra.disabled = true; // IMPORTANT: Blochează apăsarea butonului din browser
                 btnOra.innerText += oreOcupateArray.includes(oraTxt) ? " (Ocupat)" : " (Trecut)";
             } else {
                 btnOra.addEventListener('click', () => toggleOra(btnOra, oraTxt));
