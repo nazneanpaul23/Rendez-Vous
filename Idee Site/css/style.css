@@ -1,17 +1,31 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; }
 
-/* 1. Punem animația direct pe BODY ca să acopere 100% din ecran (inclusiv marginile telefonului) */
+/* 1. Setăm un fundal negru curat la bază pentru a evita orice flash alb la scroll */
 html, body {
-    background: #030303; 
-    background-image: 
-        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%,rgba(88, 78, 20, 0.189)50%, transparent 85%),
-        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 50%);
-    background-size: 250% 250%; 
-    animation: miscareLuminaDapta 10s ease infinite alternate;
+    background-color: #030303;
+    width: 100%;
     min-height: 100dvh;
 }
 
-/* 2. Containerul rămâne doar pentru a alinia butoanele pe centru, dar fără să mai oprească fundalul */
+/* 2. Trucul suprem: Creăm "tapetul" animat care stă fixat permanent pe ecran */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh; /* Fallback pentru telefoane mai vechi */
+    height: 100dvh; /* Dimensiunea perfectă și dinamică pentru iPhone/Android */
+    z-index: -10; /* Îl trimitem în spatele tuturor elementelor */
+    background-color: #030303;
+    background-image: 
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(88, 78, 20, 0.189) 50%, transparent 85%),
+        radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 50%);
+    background-size: 250% 250%; 
+    animation: miscareLuminaDapta 10s ease infinite alternate;
+}
+
+/* 3. Containerul tău ține doar cardurile, devine transparent ca să lase "tapetul" să se vadă */
 .fundal-water { 
     width: 100%; 
     min-height: 100dvh; 
@@ -20,6 +34,7 @@ html, body {
     align-items: center; 
     justify-content: center; 
     position: relative; 
+    background: transparent; 
 }
 
 @keyframes miscareLuminaDapta { 
