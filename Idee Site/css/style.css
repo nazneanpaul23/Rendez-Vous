@@ -1,26 +1,26 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; }
 
-/* 1. Culoare neagră doar pe HTML pentru a acoperi "bounce-ul" de la Safari (când tragi de ecran) */
+/* 1. Previne marginile albe/gri la scroll */
 html {
     background-color: #030303;
 }
 
 body {
-    background-color: transparent; /* CRITIC: Lăsăm body transparent ca să se vadă animația de dedesubt */
+    background-color: transparent; 
     width: 100%;
     min-height: 100dvh;
 }
 
-/* 2. Tapetul tău cu animația - acum se va vedea perfect și va acoperi tot ecranul */
+/* 2. Tapetul animat: întins forțat sub bara de sus și de jos a telefonului */
 body::before {
     content: "";
     position: fixed;
-    top: 0;
+    /* Schimbarea critică: Extindem animația dincolo de marginile vizibile */
+    top: -50px;
+    bottom: -50px;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    z-index: -1; /* Îl ține garantat în spatele butoanelor și textului */
+    right: 0;
+    z-index: -1;
     background-color: #030303;
     background-image: 
         linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(88, 78, 20, 0.189) 50%, transparent 85%),
@@ -29,7 +29,7 @@ body::before {
     animation: miscareLuminaDapta 10s ease infinite alternate;
 }
 
-/* 3. Containerul principal redevine transparent */
+/* 3. Containerul principal rămâne transparent pentru a lăsa tapetul să strălucească */
 .fundal-water { 
     width: 100%; 
     min-height: 100dvh; 
