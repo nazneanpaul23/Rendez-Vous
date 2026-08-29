@@ -212,3 +212,17 @@ input:checked + .slider:before { transform: translateX(22px); }
         margin: 10px; /* Reduci marginile mari de pe desktop pentru a câștiga spațiu util */
     }
 }
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden; /* Previne mișcarea enervantă a site-ului stânga-dreapta */
+    }
+
+    .clasa-ta-pentru-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Le împarte exact la jumătate din ecran */
+        gap: 15px;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
