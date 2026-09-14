@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rezervări Sport</title>
     
     <link rel="stylesheet" href="css/style.css">
@@ -64,6 +64,7 @@
             </div>
 
             <div id="form-register" class="formular-auth" style="display: none;">
+                <div class="grup-input"><label data-i18n="nume_complet">Nume Complet / Username</label><input type="text" id="reg-nume" placeholder="Numele tău" required></div>
                 <div class="grup-input"><label data-i18n="email">Adresă Email</label><input type="email" id="reg-email" placeholder="nume@email.com" required></div>
                 <div class="grup-input"><label data-i18n="telefon">Număr de Telefon</label><input type="tel" id="reg-telefon" placeholder="0712345678" required></div>
                 <div class="grup-input"><label data-i18n="parola">Parolă</label><input type="password" id="reg-parola" placeholder="••••••••" required></div>
@@ -85,8 +86,11 @@
                 <h2 data-i18n="profil_titlu">Profilul Tău</h2>
             </div>
             <div class="detalii-utilizator">
-                <p>📧 <span id="profil-email">client@email.com</span></p>
-                <p>📞 <span id="profil-telefon">0712 345 678</span></p>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span>👤</span> <strong id="profil-nume" style="color: white;">Nume Nesetat</strong>
+                </div>
+                <p style="display: flex; gap: 10px;"><span>📧</span> <span id="profil-email">client@email.com</span></p>
+                <p style="display: flex; gap: 10px;"><span>📞</span> <span id="profil-telefon">0712 345 678</span></p>
             </div>
             <div class="actiuni-cont">
                 <button class="btn-cont" id="btn-vezi-active">🟢 <span data-i18n="rez_active">Rezervări Active</span> (<span id="nr-active">0</span>)</button>
