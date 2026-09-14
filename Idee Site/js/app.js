@@ -5,6 +5,7 @@ window.dict = {
     'ro': {
         'contul_meu': 'Contul Meu', 'login_cont': 'Login / Cont', 'fotbal': 'Fotbal', 'baschet': 'Baschet', 'tenis': 'Tenis', 'volei': 'Volei',
         'autentificare': 'Autentificare', 'creare_cont': 'Creare Cont', 'email': 'Adresă Email', 'parola': 'Parolă', 'telefon': 'Număr de Telefon',
+        'nume_complet': 'Nume Complet (Username)',
         'intra_cont': 'Intră în cont', 'btn_creare_cont': 'Creează Cont', 'profil_titlu': 'Profilul Tău', 'rez_active': 'Rezervări Active',
         'istoric': 'Istoric Rezervări', 'deconectare': 'Deconectare', 'inapoi_profil': 'Înapoi la Profil', 'alege_terenul': 'Alege Terenul',
         'data_dorita': 'Data Dorită', 'ora_dorita': 'Ora Dorită', 'toate_orele': 'Toate Orele', 'inapoi': 'Înapoi',
@@ -17,6 +18,7 @@ window.dict = {
     'hu': {
         'contul_meu': 'Fiókom', 'login_cont': 'Belépés / Fiók', 'fotbal': 'Foci', 'baschet': 'Kosárlabda', 'tenis': 'Tenisz', 'volei': 'Röplabda',
         'autentificare': 'Bejelentkezés', 'creare_cont': 'Regisztráció', 'email': 'E-mail cím', 'parola': 'Jelszó', 'telefon': 'Telefonszám',
+        'nume_complet': 'Teljes Név (Felhasználónév)',
         'intra_cont': 'Belépés', 'btn_creare_cont': 'Fiók létrehozása', 'profil_titlu': 'Profilod', 'rez_active': 'Aktív foglalások',
         'istoric': 'Foglalási előzmények', 'deconectare': 'Kijelentkezés', 'inapoi_profil': 'Vissza a profilhoz', 'alege_terenul': 'Pálya kiválasztása',
         'data_dorita': 'Kívánt dátum', 'ora_dorita': 'Kívánt időpont', 'toate_orele': 'Minden időpont', 'inapoi': 'Vissza',
@@ -29,6 +31,7 @@ window.dict = {
     'en': {
         'contul_meu': 'My Account', 'login_cont': 'Login / Account', 'fotbal': 'Football', 'baschet': 'Basketball', 'tenis': 'Tennis', 'volei': 'Volleyball',
         'autentificare': 'Login', 'creare_cont': 'Register', 'email': 'Email Address', 'parola': 'Password', 'telefon': 'Phone Number',
+        'nume_complet': 'Full Name (Username)',
         'intra_cont': 'Sign In', 'btn_creare_cont': 'Create Account', 'profil_titlu': 'Your Profile', 'rez_active': 'Active Bookings',
         'istoric': 'Booking History', 'deconectare': 'Logout', 'inapoi_profil': 'Back to Profile', 'alege_terenul': 'Choose Court',
         'data_dorita': 'Desired Date', 'ora_dorita': 'Desired Time', 'toate_orele': 'All Hours', 'inapoi': 'Back',
@@ -134,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnTopCont) {
         btnTopCont.addEventListener('click', async () => {
             if (loggedInUser) {
+                if(document.getElementById('profil-nume')) document.getElementById('profil-nume').innerText = loggedInUser.nume || "Nume Nesetat";
                 document.getElementById('profil-email').innerText = loggedInUser.email;
                 if(document.getElementById('profil-telefon')) document.getElementById('profil-telefon').innerText = loggedInUser.telefon || "-";
                 
@@ -146,6 +150,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else document.getElementById('modal-auth').style.display = 'flex';
         });
     }
+
+    // --- ESC PENTRU A ÎNCHIDE ORICE MODAL ---
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari'];
+            modals.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.style.display !== 'none') el.style.display = 'none';
+            });
+        }
+    });
+
+    // --- ENTER PENTRU LOGIN / REGISTER ---
+    document.getElementById('form-login')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-executa-login')?.click(); }
+    });
+    document.getElementById('form-register')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-executa-register')?.click(); }
+    });
 
     document.getElementById('inchide-auth')?.addEventListener('click', () => document.getElementById('modal-auth').style.display = 'none');
     document.getElementById('inchide-profil')?.addEventListener('click', () => document.getElementById('modal-profil').style.display = 'none');
@@ -170,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(!email || !parola) return alert("Completati datele!");
         const { data } = await db.from('clienti').select('*').eq('email', email).eq('parola', parola).single();
         if (data) {
-            const safeUser = { id: data.id, email: data.email, telefon: data.telefon };
+            const safeUser = { id: data.id, nume: data.nume, email: data.email, telefon: data.telefon };
             loggedInUser = safeUser; 
             localStorage.setItem('user_session', JSON.stringify(safeUser));
             document.getElementById('modal-auth').style.display = 'none'; window.actualizeazaButonCont();
@@ -178,12 +201,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('btn-executa-register')?.addEventListener('click', async () => {
-        const email = document.getElementById('reg-email').value.trim(); const telefon = document.getElementById('reg-telefon').value.trim(); const parola = document.getElementById('reg-parola').value.trim();
-        if(!email || !telefon || !parola) return;
-        const { data: verificare } = await db.from('clienti').select('email').eq('email', email).single();
-        if (verificare) return alert("Există deja cont cu acest email!");
-        const { error } = await db.from('clienti').insert([{ email, telefon, parola }]);
-        if (!error) document.getElementById('tab-login').click();
+        const nume = document.getElementById('reg-nume').value.trim();
+        const email = document.getElementById('reg-email').value.trim(); 
+        const telefon = document.getElementById('reg-telefon').value.trim(); 
+        const parola = document.getElementById('reg-parola').value.trim();
+        
+        if(!nume || !email || !telefon || !parola) return alert("Completați toate câmpurile!");
+        
+        const btn = document.getElementById('btn-executa-register');
+        btn.innerText = "⏳..."; btn.disabled = true;
+
+        const { data: verificareEmail } = await db.from('clienti').select('email').eq('email', email).single();
+        if (verificareEmail) {
+            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
+            return alert("Există deja un cont cu această adresă de email! Te rugăm să te conectezi pe el.");
+        }
+
+        const { data: verificareTel } = await db.from('clienti').select('telefon').eq('telefon', telefon);
+        if (verificareTel && verificareTel.length > 0) {
+            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
+            return alert("Acest număr de telefon este deja folosit pentru alt cont! Nu poți crea mai multe conturi pe același număr.");
+        }
+
+        const { error } = await db.from('clienti').insert([{ nume, email, telefon, parola }]);
+        btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
+        
+        if (!error) {
+            alert("Cont creat cu succes! Te poți autentifica acum.");
+            document.getElementById('tab-login').click();
+        } else {
+            alert("Eroare: " + error.message);
+        }
     });
 
     // --- ISTORIC REZERVĂRI ---
@@ -373,9 +421,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         containerZile.innerHTML = '';
         const azi = new Date();
 
+        // Extragem data din filtru pentru a o selecta automat
+        let indexDeSelectat = 0;
+        const filtruDataInput = document.getElementById('filtru-data');
+        if (filtruDataInput && filtruDataInput.value) {
+            const dataC = new Date(filtruDataInput.value);
+            const aziFaraOra = new Date(azi.getFullYear(), azi.getMonth(), azi.getDate());
+            dataC.setHours(0,0,0,0);
+            const diffDays = Math.round((dataC - aziFaraOra) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0 && diffDays < 7) {
+                indexDeSelectat = diffDays;
+            }
+        }
+
         for (let i = 0; i < 7; i++) {
             let dataCurenta = new Date(); dataCurenta.setDate(azi.getDate() + i);
-            let btnZi = document.createElement('button'); btnZi.className = 'btn-zi' + (i === 0 ? ' selectat' : '');
+            let btnZi = document.createElement('button'); btnZi.className = 'btn-zi' + (i === indexDeSelectat ? ' selectat' : '');
             
             let ziTextVizual = i === 0 ? window.dict[window.lang]['azi'] : (i === 1 ? window.dict[window.lang]['maine'] : window.dict[window.lang]['zile'][dataCurenta.getDay()]);
             
@@ -390,7 +451,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 incarcaOreDinSupabase();
             });
             containerZile.appendChild(btnZi);
-            if (i === 0) btnZi.click();
+            if (i === indexDeSelectat) btnZi.click();
         }
     };
 
@@ -411,6 +472,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const oraCurenta = new Date().getHours(); 
         const esteZiuaDeAzi = (dataSelectataStr === aziStringFormatat);
 
+        // NOU: Verificăm ce a selectat clientul în filtru pentru Oră
+        const filtruOraInput = document.getElementById('filtru-ora');
+        const oraCautataInFiltru = filtruOraInput ? filtruOraInput.value : 'ALL';
+        
+        // Verificăm dacă suntem fix pe ziua căutată în filtru
+        let suntemPeZiuaCautata = false;
+        const filtruDataInput = document.getElementById('filtru-data');
+        if (filtruDataInput && filtruDataInput.value) {
+            const dataC = new Date(filtruDataInput.value);
+            const ziTextDB = numeZileT_DB[dataC.getDay()];
+            const ziNumar = String(dataC.getDate()).padStart(2, '0');
+            const lunaNumar = String(dataC.getMonth() + 1).padStart(2, '0');
+            if (`${ziTextDB}, ${ziNumar}.${lunaNumar}` === dataSelectataStr) {
+                suntemPeZiuaCautata = true;
+            }
+        }
+
         containerOre.innerHTML = '';
         for (let i = 12; i <= 22; i++) {
             let oraTxt = `${i}:00`; let btnOra = document.createElement('button');
@@ -422,9 +500,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnOra.innerText += oreOcupateArray.includes(oraTxt) ? ` (${window.dict[window.lang]['ocupat']})` : ` (${window.dict[window.lang]['trecut']})`;
             } else {
                 btnOra.addEventListener('click', () => toggleOra(btnOra, oraTxt));
+                
+                // Dacă ora curentă corespunde cu cea din filtru, o bifăm automat
+                if (suntemPeZiuaCautata && oraCautataInFiltru === oraTxt) {
+                    btnOra.classList.add('selectat');
+                    oraSelectata.push(oraTxt);
+                }
             }
             containerOre.appendChild(btnOra);
         }
+        
+        actualizeazaButonFinal(); // Reactualizăm butonul de rezervare ca să fie verde și gata de plată
     }
 
     function toggleOra(btn, ora) {
