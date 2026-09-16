@@ -13,7 +13,11 @@ window.dict = {
         'alege_ora': 'Alege Ora (Poți selecta mai multe)', 'disclaimer': '⚠️ Atenție: Rezervarea poate fi anulată gratuit doar cu cel puțin 6 ore înainte de ora începerii.',
         'vezi_locatia': 'Vezi Locația (Hartă)', 'alegeti_o_ora': 'Alegeți o oră', 'zile': ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"], 'azi': 'Azi', 'maine': 'Mâine',
         'lei_ora': 'Lei/oră', 'ocupat': 'Ocupat', 'trecut': 'Trecut', 'rezerva': 'Rezervă', 'se_cauta': 'Se caută terenuri disponibile...',
-        'fara_rezervari': 'Nu ai rezervări momentan.', 'anuleaza': '❌ Anulează (Gratuit)'
+        'fara_rezervari': 'Nu ai rezervări momentan.', 'anuleaza': '❌ Anulează (Gratuit)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Rezervările Tale Active', 'chat_titlu': '💬 Mesaje Chat',
+        'chat_cauta_conv': 'Se caută conversații...', 'chat_alege_conv': 'Alege o conversație',
+        'chat_selecteaza_stanga': 'Selectează un teren din stânga pentru a vedea mesajele.', 'chat_scrie': 'Scrie un mesaj...',
+        'chat_avertisment': 'Este nevoie de rezervare pentru a trimite un chat'
     },
     'hu': {
         'contul_meu': 'Fiókom', 'login_cont': 'Belépés / Fiók', 'fotbal': 'Foci', 'baschet': 'Kosárlabda', 'tenis': 'Tenisz', 'volei': 'Röplabda',
@@ -26,7 +30,11 @@ window.dict = {
         'alege_ora': 'Válassz időpontot (többet is lehet)', 'disclaimer': '⚠️ Figyelem: A foglalás ingyenesen lemondható a kezdés előtt legalább 6 órával.',
         'vezi_locatia': 'Helyszín (Térkép)', 'alegeti_o_ora': 'Válassz időpontot', 'zile': ["Vas", "Hét", "Ked", "Sze", "Csü", "Pén", "Szo"], 'azi': 'Ma', 'maine': 'Holnap',
         'lei_ora': 'RON/óra', 'ocupat': 'Foglalt', 'trecut': 'Elmúlt', 'rezerva': 'Foglalás', 'se_cauta': 'Szabad pályák keresése...',
-        'fara_rezervari': 'Jelenleg nincsenek foglalásaid.', 'anuleaza': '❌ Lemondás (Ingyenes)'
+        'fara_rezervari': 'Jelenleg nincsenek foglalásaid.', 'anuleaza': '❌ Lemondás (Ingyenes)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Aktív foglalásaid', 'chat_titlu': '💬 Chat üzenetek',
+        'chat_cauta_conv': 'Beszélgetések keresése...', 'chat_alege_conv': 'Válassz egy beszélgetést',
+        'chat_selecteaza_stanga': 'Válassz egy pályát balról az üzenetek megtekintéséhez.', 'chat_scrie': 'Írj egy üzenetet...',
+        'chat_avertisment': 'Üzenet küldéséhez aktív foglalás szükséges'
     },
     'en': {
         'contul_meu': 'My Account', 'login_cont': 'Login / Account', 'fotbal': 'Football', 'baschet': 'Basketball', 'tenis': 'Tennis', 'volei': 'Volleyball',
@@ -39,7 +47,11 @@ window.dict = {
         'alege_ora': 'Choose Time (Select multiple)', 'disclaimer': '⚠️ Warning: Free cancellation is only available up to 6 hours before start time.',
         'vezi_locatia': 'View Location (Map)', 'alegeti_o_ora': 'Choose a time', 'zile': ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], 'azi': 'Today', 'maine': 'Tomorrow',
         'lei_ora': 'RON/hour', 'ocupat': 'Booked', 'trecut': 'Passed', 'rezerva': 'Book', 'se_cauta': 'Searching for available courts...',
-        'fara_rezervari': 'You have no bookings at the moment.', 'anuleaza': '❌ Cancel (Free)'
+        'fara_rezervari': 'You have no bookings at the moment.', 'anuleaza': '❌ Cancel (Free)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Your Active Bookings', 'chat_titlu': '💬 Chat Messages',
+        'chat_cauta_conv': 'Searching for conversations...', 'chat_alege_conv': 'Choose a conversation',
+        'chat_selecteaza_stanga': 'Select a court from the left to view messages.', 'chat_scrie': 'Type a message...',
+        'chat_avertisment': 'An active booking is required to send a message'
     }
 };
 
@@ -59,6 +71,27 @@ window.traduData = function(dataStrDB) {
     return dataStrDB; // Fallback, returnează textul netradus
 };
 
+// Funcție globală pentru verificarea exactă a timpului (ținând cont de anul creării)
+window.esteRezervareTrecuta = function(dataStr, ora, timestamp_start) {
+    if (!dataStr || !ora) return false;
+    const matchData = dataStr.match(/\d{1,2}\.\d{1,2}/); 
+    if (!matchData) return false;
+    const [zi, luna] = matchData[0].split('.');
+    const oraRezervareNumar = parseInt(ora.split(':')[0]);
+    const acum = new Date();
+    
+    let anRezervare = acum.getFullYear();
+    if (timestamp_start) {
+        const dataCreare = new Date(timestamp_start);
+        anRezervare = dataCreare.getFullYear();
+        if (dataCreare.getMonth() === 11 && parseInt(luna) === 1) anRezervare++;
+    } else {
+        if (acum.getMonth() === 11 && parseInt(luna) === 1) anRezervare++;
+    }
+    const dataTerminarii = new Date(anRezervare, parseInt(luna) - 1, parseInt(zi), oraRezervareNumar, 59, 59);
+    return dataTerminarii < acum;
+};
+
 window.schimbaLimba = function(limbaNoua) {
     window.lang = limbaNoua;
     localStorage.setItem('limba_app', window.lang);
@@ -66,7 +99,14 @@ window.schimbaLimba = function(limbaNoua) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const cheie = el.getAttribute('data-i18n');
         if (window.dict[window.lang][cheie]) {
-            el.innerText = window.dict[window.lang][cheie];
+            el.innerHTML = window.dict[window.lang][cheie];
+        }
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const cheie = el.getAttribute('data-i18n-placeholder');
+        if (window.dict[window.lang][cheie]) {
+            el.placeholder = window.dict[window.lang][cheie];
         }
     });
 
@@ -143,8 +183,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 const nrActiveSpan = document.getElementById('nr-active');
                 if (nrActiveSpan) {
-                    const { data } = await db.from('rezervari').select('id').ilike('email_client', loggedInUser.email.trim()).neq('stare', 'anulata');
-                    nrActiveSpan.innerText = data ? data.length : 0;
+                    const { data } = await db.from('rezervari').select('data_str, ora, stare, timestamp_start').eq('email_client', loggedInUser.email.trim()).neq('stare', 'anulata');
+                    let nrReale = 0;
+                    if (data) {
+                        data.forEach(r => {
+                            if (!window.esteRezervareTrecuta(r.data_str, r.ora, r.timestamp_start)) nrReale++;
+                        });
+                    }
+                    nrActiveSpan.innerText = nrReale;
                 }
                 document.getElementById('modal-profil').style.display = 'flex';
             } else document.getElementById('modal-auth').style.display = 'flex';
@@ -154,12 +200,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- ESC PENTRU A ÎNCHIDE ORICE MODAL ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari'];
+            const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari', 'modal-chat-client'];
             modals.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && el.style.display !== 'none') el.style.display = 'none';
             });
         }
+    });
+
+    // --- PREVENIRE SCROLL FUNDAL (MUTATION OBSERVER PENTRU MODALE) ---
+    const observerModale = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+                const anyModalOpen = Array.from(document.querySelectorAll('.modal')).some(m => m.style.display === 'flex' || m.style.display === 'block');
+                if (anyModalOpen) {
+                    document.body.classList.add('fara-scroll');
+                } else {
+                    document.body.classList.remove('fara-scroll');
+                }
+            }
+        });
+    });
+    document.querySelectorAll('.modal').forEach(m => {
+        observerModale.observe(m, { attributes: true });
     });
 
     // --- ENTER PENTRU LOGIN / REGISTER ---
@@ -260,16 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let afisate = 0; const acum = new Date();
 
         data.sort((a, b) => b.id - a.id).forEach((r) => {
-            let esteTrecuta = false;
-            const matchData = r.data_str.match(/\d{2}\.\d{2}/); 
-            if (matchData && r.stare !== 'anulata') {
-                const [zi, luna] = matchData[0].split('.');
-                const oraRezervareNumar = parseInt(r.ora.split(':')[0]);
-                let anCurent = acum.getFullYear();
-                if (acum.getMonth() === 11 && parseInt(luna) === 1) anCurent++;
-                const dataTerminarii = new Date(anCurent, parseInt(luna) - 1, parseInt(zi), oraRezervareNumar, 59, 59);
-                if (dataTerminarii < acum) esteTrecuta = true;
-            }
+            const esteTrecuta = window.esteRezervareTrecuta(r.data_str, r.ora, r.timestamp_start);
 
             if (tip === 'active' && (r.stare === 'anulata' || esteTrecuta)) return;
             afisate++;
@@ -579,4 +633,286 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (erori === 0) { document.getElementById('modal-rezervare').style.display = 'none'; } 
         butonConfirma.disabled = false;
     });
+
+    // ----------------------------------------
+    // REALTIME REZERVĂRI (pentru update vizual live)
+    // ----------------------------------------
+    db.channel('rezervari_live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rezervari' }, payload => {
+            if (document.getElementById('modal-rezervare')?.style.display === 'flex') {
+                if (payload.new && payload.new.teren === terenCurent && payload.new.data_str === dataSelectataStr) {
+                    const oraOcupata = payload.new.ora;
+                    const btns = document.querySelectorAll('.btn-ora');
+                    btns.forEach(b => {
+                        if (b.innerText.startsWith(oraOcupata) && !b.classList.contains('ocupat')) {
+                            b.classList.add('ocupat');
+                            b.disabled = true;
+                            b.innerText = `${oraOcupata} (${window.dict[window.lang]['ocupat']})`;
+                            if (b.classList.contains('selectat')) {
+                                b.classList.remove('selectat');
+                                oraSelectata = oraSelectata.filter(o => o !== oraOcupata);
+                                actualizeazaButonFinal();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+        .subscribe();
+
+    // ==========================================
+    // LOGICĂ CHAT CLIENT
+    // ==========================================
+    let chatClientRealtime = null;
+    let chatClientMesajeToate = [];
+    let chatClientTerenCurent = null;
+    
+    const btnVeziChat = document.getElementById('btn-vezi-chat');
+    const modalChatClient = document.getElementById('modal-chat-client');
+    const btnInchideChatClient = document.getElementById('inchide-chat-client');
+    const inputChatClient = document.getElementById('chat-client-input');
+    const btnTrimiteChatClient = document.getElementById('chat-client-btn-trimite');
+    const avertismentChatClient = document.getElementById('chat-client-avertisment');
+
+    btnVeziChat?.addEventListener('click', () => {
+        document.getElementById('modal-profil').style.display = 'none';
+        modalChatClient.style.display = 'flex';
+        incarcaMesajeClient();
+    });
+
+    btnInchideChatClient?.addEventListener('click', () => {
+        modalChatClient.style.display = 'none';
+        document.getElementById('modal-profil').style.display = 'flex';
+    });
+
+    async function initializareRealtimeChatClient() {
+        if (chatClientRealtime) db.removeChannel(chatClientRealtime);
+        if (!loggedInUser) return;
+        
+        // Preluare inițială pentru bulină
+        await incarcaMesajeClient(false); // Nu randăm interfața, doar actualizăm datele interne și bulina
+        
+        chatClientRealtime = db.channel('mesaje_chat_client')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'mesaje_chat', filter: `email_client=eq.${loggedInUser.email}` }, payload => {
+                // Dacă suntem cu modalul deschis, re-randăm complet
+                if (modalChatClient && modalChatClient.style.display === 'flex') {
+                    incarcaMesajeClient();
+                } else {
+                    // Dacă e închis, trebuie să obținem doar mesajul nou și să vedem dacă aprindem bulina
+                    if (payload.new && payload.new.expeditor === 'admin' && payload.new.citit === false) {
+                        const bulina = document.getElementById('bulina-chat-client');
+                        if (bulina) {
+                            bulina.style.display = 'block';
+                            bulina.innerText = parseInt(bulina.innerText || 0) + 1;
+                        }
+                    }
+                }
+            })
+            .subscribe();
+    }
+
+    async function incarcaMesajeClient(randeaza = true) {
+        if (!loggedInUser) return;
+        
+        const { data, error } = await db.from('mesaje_chat')
+            .select('*')
+            .eq('email_client', loggedInUser.email)
+            .order('created_at', { ascending: true });
+
+        if (error) { console.error("Eroare chat: ", error); return; }
+        chatClientMesajeToate = data || [];
+        
+        // Calculează câte mesaje necitite sunt (trimise de admin)
+        const nrNecitite = chatClientMesajeToate.filter(m => m.expeditor === 'admin' && m.citit === false).length;
+        const bulina = document.getElementById('bulina-chat-client');
+        if (bulina) {
+            bulina.style.display = nrNecitite > 0 ? 'block' : 'none';
+            bulina.innerText = nrNecitite;
+        }
+
+        if (randeaza) randeazaListaConversatiiClient();
+    }
+
+    async function randeazaListaConversatiiClient() {
+        const listaSide = document.getElementById('chat-client-lista-terenuri');
+        if (!listaSide) return;
+        
+        // Obținem lista de terenuri unice din mesajele anterioare
+        const terenuriCuMesaje = [...new Set(chatClientMesajeToate.map(m => m.teren))];
+        
+        // Obținem terenurile unde clientul are rezervare (pentru a-i permite să deschidă chat nou și acolo)
+        const { data: rezervari } = await db.from('rezervari').select('teren').eq('email_client', loggedInUser.email);
+        const terenuriRezervate = rezervari ? [...new Set(rezervari.map(r => r.teren))] : [];
+        
+        const toateTerenurileClient = [...new Set([...terenuriCuMesaje, ...terenuriRezervate])];
+
+        if (toateTerenurileClient.length === 0) {
+            listaSide.innerHTML = '<p style="color: #ccc; font-size: 13px; text-align: center;">Nu ai interacțiuni sau rezervări.</p>';
+            return;
+        }
+
+        listaSide.innerHTML = '';
+        
+        for (const teren of toateTerenurileClient) {
+            const mesajeTeren = chatClientMesajeToate.filter(m => m.teren === teren);
+            const ultimulMesaj = mesajeTeren.length > 0 ? mesajeTeren[mesajeTeren.length - 1].mesaj : 'Fără mesaje încă.';
+            const areNecitite = mesajeTeren.some(m => m.expeditor === 'admin' && m.citit === false);
+            
+            const card = document.createElement('div');
+            card.className = `card-conversatie ${areNecitite ? 'necitit' : ''}`;
+            if (chatClientTerenCurent === teren) card.style.borderColor = 'white'; // Selectat
+            
+            card.innerHTML = `
+                <h4>🏟️ ${teren}</h4>
+                <p>${ultimulMesaj}</p>
+            `;
+            
+            card.addEventListener('click', () => {
+                chatClientTerenCurent = teren;
+                randeazaListaConversatiiClient(); // pt a updata stilul "selectat"
+                deschideConversatiaClient(teren);
+            });
+            
+            listaSide.appendChild(card);
+        }
+        
+        // Dacă aveam deja unul selectat, îi re-randăm mesajele (în caz că a venit un mesaj nou)
+        if (chatClientTerenCurent) {
+            deschideConversatiaClient(chatClientTerenCurent);
+        }
+    }
+
+    async function deschideConversatiaClient(teren) {
+        document.getElementById('chat-client-teren-titlu').style.display = 'block';
+        document.getElementById('chat-client-teren-titlu').innerText = `Conversație cu Admin (${teren})`;
+        
+        const container = document.getElementById('chat-client-mesaje');
+        container.innerHTML = '';
+        
+        const mesajeTeren = chatClientMesajeToate.filter(m => m.teren === teren);
+        let idUriDeMarcat = [];
+
+        mesajeTeren.forEach(m => {
+            const bula = document.createElement('div');
+            const dataObj = new Date(m.created_at);
+            const dataOraFormata = `${dataObj.getDate().toString().padStart(2, '0')}.${(dataObj.getMonth() + 1).toString().padStart(2, '0')} ${dataObj.getHours().toString().padStart(2, '0')}:${dataObj.getMinutes().toString().padStart(2, '0')}`;
+            
+            if (m.expeditor === 'client') {
+                bula.className = 'mesaj-bula mesaj-trimis';
+                let culoareBife = m.citit ? 'bife-albastre' : 'bife-gri';
+                bula.innerHTML = `${m.mesaj} <span class="mesaj-timestamp">${dataOraFormata} <span class="bife-citit ${culoareBife}">✓✓</span></span>`;
+            } else {
+                bula.className = 'mesaj-bula mesaj-primit';
+                bula.innerHTML = `${m.mesaj} <span class="mesaj-timestamp">${dataOraFormata}</span>`;
+                if (!m.citit) idUriDeMarcat.push(m.id);
+            }
+            container.appendChild(bula);
+        });
+
+        if (mesajeTeren.length === 0) {
+            container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;">Scrie un mesaj pentru a începe conversația.</p>';
+        }
+
+        // Derulează jos
+        container.scrollTop = container.scrollHeight;
+
+        // Dacă sunt mesaje necitite de la admin, le marcăm ca citite
+        if (idUriDeMarcat.length > 0) {
+            await db.from('mesaje_chat').update({ citit: true }).in('id', idUriDeMarcat);
+            // Bulina se va actualiza via Realtime sau la următorul refresh
+        }
+
+        // Verificare dacă are voie să scrie (rezervare activă)
+        const acum = new Date();
+        const { data: rezervariActive } = await db.from('rezervari')
+            .select('*')
+            .eq('email_client', loggedInUser.email)
+            .eq('teren', teren)
+            .eq('stare', 'activa');
+
+        let areRezervareBuna = false;
+        if (rezervariActive && rezervariActive.length > 0) {
+            for (const r of rezervariActive) {
+                if (!window.esteRezervareTrecuta(r.data_str, r.ora, r.timestamp_start)) {
+                    areRezervareBuna = true;
+                    break;
+                }
+            }
+        }
+
+        if (areRezervareBuna) {
+            inputChatClient.disabled = false;
+            btnTrimiteChatClient.disabled = false;
+            avertismentChatClient.style.display = 'none';
+        } else {
+            inputChatClient.disabled = true;
+            btnTrimiteChatClient.disabled = true;
+            avertismentChatClient.style.display = 'block';
+        }
+    }
+
+    // Trimitere Mesaj Client
+    async function trimiteMesajClient() {
+        if (!chatClientTerenCurent || inputChatClient.disabled) return;
+        const text = inputChatClient.value.trim();
+        if (!text) return;
+
+        inputChatClient.disabled = true;
+        btnTrimiteChatClient.disabled = true;
+
+        // VERIFICARE STRICTĂ ÎNAINTE DE TRIMITE: Mai are dreptul?
+        const { data: verif } = await db.from('rezervari')
+            .select('*').eq('email_client', loggedInUser.email).eq('teren', chatClientTerenCurent).eq('stare', 'activa');
+        let incaAreBuna = false;
+        if (verif) {
+            for (const r of verif) {
+                if (!window.esteRezervareTrecuta(r.data_str, r.ora, r.timestamp_start)) {
+                    incaAreBuna = true; break;
+                }
+            }
+        }
+
+        if (!incaAreBuna) {
+            alert(window.dict[window.lang]['chat_avertisment']);
+            avertismentChatClient.style.display = 'block';
+            return; // Nu trimitem
+        }
+
+        const { error } = await db.from('mesaje_chat').insert([{
+            email_client: loggedInUser.email,
+            teren: chatClientTerenCurent,
+            expeditor: 'client',
+            mesaj: text,
+            citit: false
+        }]);
+
+        if (error) {
+            alert("Eroare la trimitere: " + error.message);
+        } else {
+            inputChatClient.value = '';
+        }
+
+        inputChatClient.disabled = false;
+        btnTrimiteChatClient.disabled = false;
+        inputChatClient.focus();
+    }
+
+    btnTrimiteChatClient?.addEventListener('click', trimiteMesajClient);
+    inputChatClient?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') trimiteMesajClient();
+    });
+
+    // Pornim Realtime la start dacă e logat
+    if (loggedInUser) {
+        initializareRealtimeChatClient();
+    }
+
+    // Mai trebuie să prindem momentul când se loghează și să inițializăm
+    const originalLoginBtn = document.getElementById('btn-executa-login');
+    if (originalLoginBtn) {
+        originalLoginBtn.addEventListener('click', () => {
+            setTimeout(() => { if (loggedInUser) initializareRealtimeChatClient(); }, 1500);
+        });
+    }
+
 });
