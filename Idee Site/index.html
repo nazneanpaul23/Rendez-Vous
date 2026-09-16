@@ -98,6 +98,10 @@
             <div class="actiuni-cont">
                 <button class="btn-cont" id="btn-vezi-active">🟢 <span data-i18n="rez_active">Rezervări Active</span> (<span id="nr-active">0</span>)</button>
                 <button class="btn-cont" id="btn-vezi-istoric">🕒 <span data-i18n="istoric">Istoric Rezervări</span></button>
+                <button class="btn-cont" id="btn-vezi-chat" style="position: relative;">
+                    💬 <span data-i18n="chat_btn">Chat</span>
+                    <span class="bulina-notificare" id="bulina-chat-client" style="display: none;">0</span>
+                </button>
                 <button class="btn-deconectare" id="btn-logout">🚪 <span data-i18n="deconectare">Deconectare</span></button>
             </div>
         </div>
@@ -107,7 +111,7 @@
     <div class="modal" id="modal-lista-rezervari" style="display: none;">
         <div class="modal-continut" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
             <button class="buton-inchidere" id="inchide-istoric-client">X</button>
-            <h2 id="titlu-lista-rezervari" class="titlu-modal">Rezervările Tale Active</h2>
+            <h2 id="titlu-lista-rezervari" class="titlu-modal" data-i18n="rez_active_titlu">Rezervările Tale Active</h2>
             <div id="container-rezervari" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;"></div>
             <button id="inapoi-la-profil" class="buton-rezervare" style="margin-top: 20px; background: #555;" data-i18n="inapoi_profil">Înapoi la Profil</button>
         </div>
@@ -178,5 +182,41 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL CHAT CLIENT (Dual Layout) -->
+    <div class="modal" id="modal-chat-client" style="display: none;">
+        <div class="modal-continut modal-mare modal-chat-box" style="width: 100%; max-width: 800px; padding: 20px;">
+            <div class="chat-header">
+                <h2 style="font-size: 20px; color: #3b82f6;" data-i18n="chat_titlu">💬 Mesaje Chat</h2>
+                <button class="buton-inchidere" style="position: static;" id="inchide-chat-client">X</button>
+            </div>
+            
+            <div class="container-dual-chat">
+                <!-- Lista de conversații (Terenuri) -->
+                <div class="lista-conversații-side" id="chat-client-lista-terenuri">
+                    <!-- Se va popula dinamic din app.js -->
+                    <p style="color: #ccc; font-size: 13px; text-align: center; margin-top: 20px;" data-i18n="chat_cauta_conv">Se caută conversații...</p>
+                </div>
+                
+                <!-- Fereastra de mesaje efectivă -->
+                <div class="fereastra-mesaje-side">
+                    <h3 id="chat-client-teren-titlu" style="font-size: 16px; margin-bottom: 10px; color: white; display: none;" data-i18n="chat_alege_conv">Alege o conversație</h3>
+                    
+                    <div class="lista-mesaje" id="chat-client-mesaje">
+                        <p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;" data-i18n="chat_selecteaza_stanga">Selectează un teren din stânga pentru a vedea mesajele.</p>
+                    </div>
+
+                    <div class="chat-input-zona">
+                        <input type="text" id="chat-client-input" placeholder="Scrie un mesaj..." data-i18n-placeholder="chat_scrie" disabled>
+                        <button class="chat-btn-trimite" id="chat-client-btn-trimite" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                    <p id="chat-client-avertisment" style="color: #ef4444; font-size: 12px; margin-top: 5px; display: none; text-align: center;" data-i18n="chat_avertisment">Este nevoie de rezervare pentru a trimite un chat</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
