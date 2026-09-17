@@ -154,6 +154,9 @@ window.incarcaTabelProgram = async function() {
         }
     }
 
+    const { data: infoTeren } = await db.from('terenuri').select('are_chat').eq('nume', terenAles).single();
+    const terenAreChatActivat = infoTeren ? infoTeren.are_chat !== false : true;
+
     let html = '';
     const ore = ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
 
@@ -186,8 +189,18 @@ window.incarcaTabelProgram = async function() {
                     infoClient = `👤 Detalii (Manual): ${rGasita.email_client}`;
                 }
 
+                let chatBtnStr = "";
+                if (terenAreChatActivat) {
+                    if (contClient) {
+                        const clientName = contClient.nume || contClient.email.split('@')[0];
+                        chatBtnStr = `<button class="btn-tabel-chat" onclick="deschideChatDinTabel('${contClient.email}', '${terenAles}', '${clientName}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #3b82f6; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 10px; transition: 0.3s; vertical-align: middle;">💬 Chat</button>`;
+                    } else {
+                        chatBtnStr = `<button class="btn-tabel-chat" onclick="deschideChatDinTabel('${rGasita.email_client}', '${terenAles}', '${rGasita.email_client.split('@')[0]}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #3b82f6; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 10px; transition: 0.3s; vertical-align: middle;">💬 Chat</button>`;
+                    }
+                }
+
                 badge = `<span style="background: #f59e0b; color: black; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${txtOcupat}</span>`;
-                detalii = `<span style="color:white; font-size:13px; line-height:1.4;">${infoClient}</span> <br><span style="font-size:12px; color:#aaa; margin-top: 5px; display:inline-block;">💰 ${rGasita.pret_total}</span>`;
+                detalii = `<span style="color:white; font-size:13px; line-height:1.4;">${infoClient}</span> <br><div style="margin-top: 5px; display: flex; align-items: center;"><span style="font-size:12px; color:#aaa;">💰 ${rGasita.pret_total}</span>${chatBtnStr}</div>`;
                 bg = 'rgba(245, 158, 11, 0.05)';
             }
         }
@@ -401,6 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <div class="grup-input"><label>Preț Teren (Lei)</label><input type="number" id="pret-${terenDB.id}" value="${terenDB.pret}"></div>
                                         <div class="grup-input" style="display:flex; justify-content:space-between; margin-top:10px;"><label>Ofertă Minge?</label><input type="checkbox" id="minge-${terenDB.id}" ${terenDB.optiune_minge ? 'checked' : ''} style="width:20px;height:20px;"></div>
                                         <div class="grup-input" style="margin-top:10px;"><label>Preț Minge (Lei)</label><input type="number" id="pret-minge-${terenDB.id}" value="${terenDB.pret_minge || 15}"></div>
+                                        <div class="grup-input" style="display:flex; justify-content:space-between; margin-top:10px; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                            <label style="color: #a1eafb; font-weight: bold;">💬 Activează Chat (pt acest teren)</label>
+                                            <input type="checkbox" id="are-chat-${terenDB.id}" ${terenDB.are_chat !== false ? 'checked' : ''} style="width:20px;height:20px; cursor: pointer;">
+                                        </div>
                                         
                                         <div style="flex: 1;"></div>
                                         <button id="btn-save-${terenDB.id}" type="button" onclick="salveazaSetariTeren(${terenDB.id}, '${terenDB.nume}')" class="buton-rezervare" style="background: #3b82f6; margin-top: 15px;">💾 Salvează Setările pt ${terenDB.nume}</button>
@@ -413,12 +430,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 containerMeniu.innerHTML = htmlMeniu;
                 containerModale.innerHTML = htmlModale;
+                
+                // Reatașează observerul pentru scroll pe noile modale create
+                document.querySelectorAll('.modal').forEach(m => {
+                    observerModaleAdmin.observe(m, { attributes: true });
+                });
             }
             
-            window.initializeazaTabel(terenuriPtTabel);
+            // Reîncărcare automată tabel la selecție/login
+            const selectM = document.getElementById('tabel-teren');
+            if (selectM && terenuriPtTabel.length > 0) {
+                window.initializeazaTabel(terenuriPtTabel);
+            }
+
+            // Chat real-time pentru admin
+            setTimeout(() => { initializareRealtimeChatAdmin(); }, 1000);
 
         } else {
-            alert("Parolă incorectă sau eroare!");
+            alert("❌ Parolă incorectă!");
         }
         btn.innerText = "Intră în Sistem";
     });
@@ -479,9 +508,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const minge = document.getElementById(`minge-${idDB}`).checked;
         const pretMinge = document.getElementById(`pret-minge-${idDB}`).value;
         const esteActiv = document.getElementById(`activ-${idDB}`).checked;
+        const areChat = document.getElementById(`are-chat-${idDB}`) ? document.getElementById(`are-chat-${idDB}`).checked : true;
         const fileInput = document.getElementById(`poza-${idDB}`);
 
-        let dateDeUpdatat = { pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), este_activ: esteActiv };
+        let dateDeUpdatat = { pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), este_activ: esteActiv, are_chat: areChat };
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
             try { dateDeUpdatat.poza = await window.comprimaImagine(fileInput.files[0]); } 
@@ -817,12 +847,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    window.deschideChatDinTabel = function(email, teren, nume) {
+        // 1. Închide modalul de tabel și setări (dacă e deschis vreunul)
+        document.querySelectorAll('.modal').forEach(m => {
+            if (m.id !== 'modal-chat-admin') m.style.display = 'none';
+        });
+        
+        // 2. Setează starea conversației curente
+        chatAdminConversatieCurenta = { email: email, teren: teren, nume: nume };
+        
+        // 3. Deschide modalul de chat
+        const modalChat = document.getElementById('modal-chat-admin');
+        if (modalChat) modalChat.style.display = 'flex';
+        
+        // 4. Forțează starea expandată (Instagram style desktop / mobile active)
+        const modalBox = document.querySelector('#modal-chat-admin .modal-chat-box');
+        if (modalBox) modalBox.classList.add('conversatie-activa');
+        
+        // 5. Randează lista din stânga (ca să reflecte selecția)
+        randeazaListaConversatiiAdmin();
+        
+        // 6. Încarcă și afișează mesajele din dreapta
+        deschideConversatiaAdmin();
+    };
+
     async function deschideConversatiaAdmin() {
         if (!chatAdminConversatieCurenta) return;
         
         document.getElementById('chat-admin-conversație-titlu').style.display = 'block';
         document.getElementById('chat-admin-conversație-titlu').innerText = `Chat cu ${chatAdminConversatieCurenta.nume} (${chatAdminConversatieCurenta.teren})`;
         
+        const modalBox = document.querySelector('#modal-chat-admin .modal-chat-box');
+        if (modalBox) modalBox.classList.add('conversatie-activa');
+
         const container = document.getElementById('chat-admin-mesaje');
         container.innerHTML = '';
         
@@ -913,6 +970,21 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTrimiteChatAdmin?.addEventListener('click', trimiteMesajAdmin);
     inputChatAdmin?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') trimiteMesajAdmin();
+    });
+
+    document.getElementById('btn-inapoi-conversatie-admin')?.addEventListener('click', () => {
+        chatAdminConversatieCurenta = null;
+        const modalBox = document.querySelector('#modal-chat-admin .modal-chat-box');
+        if (modalBox) modalBox.classList.remove('conversatie-activa');
+        randeazaListaConversatiiAdmin();
+        
+        document.getElementById('chat-admin-conversație-titlu').style.display = 'none';
+        const container = document.getElementById('chat-admin-mesaje');
+        container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;">Selectează un client din stânga pentru a vedea mesajele.</p>';
+        const btnSterge = document.getElementById('btn-sterge-chat-admin');
+        if (btnSterge) btnSterge.style.display = 'none';
+        if (inputChatAdmin) inputChatAdmin.disabled = true;
+        if (btnTrimiteChatAdmin) btnTrimiteChatAdmin.disabled = true;
     });
 
     const originalLoginAdminBtn = document.getElementById('login-admin-btn');
