@@ -786,6 +786,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('chat-client-teren-titlu').style.display = 'block';
         document.getElementById('chat-client-teren-titlu').innerText = `Conversație cu Admin (${teren})`;
         
+        const modalBox = document.querySelector('#modal-chat-client .modal-chat-box');
+        if (modalBox) modalBox.classList.add('conversatie-activa');
+
         const container = document.getElementById('chat-client-mesaje');
         container.innerHTML = '';
         
@@ -902,7 +905,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Enter') trimiteMesajClient();
     });
 
-    // Pornim Realtime la start dacă e logat
+    document.getElementById('btn-inapoi-conversatie-client')?.addEventListener('click', () => {
+        chatClientTerenCurent = null;
+        const modalBox = document.querySelector('#modal-chat-client .modal-chat-box');
+        if (modalBox) modalBox.classList.remove('conversatie-activa');
+        randeazaListaConversatiiClient();
+        
+        document.getElementById('chat-client-teren-titlu').style.display = 'none';
+        const container = document.getElementById('chat-client-mesaje');
+        container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;" data-i18n="chat_selecteaza_stanga">Selectează un teren din stânga pentru a vedea mesajele.</p>';
+        if (inputChatClient) inputChatClient.disabled = true;
+        if (btnTrimiteChatClient) btnTrimiteChatClient.disabled = true;
+        if (avertismentChatClient) avertismentChatClient.style.display = 'none';
+    });
+
+    // --------------------------------------------------
+    // RESTUL LOGICII DE LOGIN, REGISTER, INCARCARE ORE
+    // --------------------------------------------------
     if (loggedInUser) {
         initializareRealtimeChatClient();
     }
