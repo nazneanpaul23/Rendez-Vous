@@ -19,7 +19,7 @@
     <div class="fundal-water">
         
         <!-- SELECTOR DE LIMBĂ (Dreapta-sus, Doar Text) -->
-        <div style="position: absolute; top: 20px; right: 20px; display: flex; background: rgba(0,0,0,0.7); border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); padding: 5px; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1000;">
+        <div id="selector-limba" style="position: absolute; top: 20px; right: 20px; display: flex; background: rgba(0,0,0,0.7); border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); padding: 5px; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1000;">
             <button id="btn-lang-ro" class="btn-lang" onclick="schimbaLimba('ro')" style="background: transparent; border: none; color: white; cursor: pointer; font-weight: bold; padding: 6px 12px; border-radius: 15px; transition: 0.3s;">RO</button>
             <button id="btn-lang-hu" class="btn-lang" onclick="schimbaLimba('hu')" style="background: transparent; border: none; color: white; cursor: pointer; font-weight: bold; padding: 6px 12px; border-radius: 15px; transition: 0.3s;">HU</button>
             <button id="btn-lang-en" class="btn-lang" onclick="schimbaLimba('en')" style="background: transparent; border: none; color: white; cursor: pointer; font-weight: bold; padding: 6px 12px; border-radius: 15px; transition: 0.3s;">EN</button>
@@ -200,7 +200,10 @@
                 
                 <!-- Fereastra de mesaje efectivă -->
                 <div class="fereastra-mesaje-side">
-                    <h3 id="chat-client-teren-titlu" style="font-size: 16px; margin-bottom: 10px; color: white; display: none;" data-i18n="chat_alege_conv">Alege o conversație</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 id="chat-client-teren-titlu" style="font-size: 16px; margin: 0; color: white; display: none;" data-i18n="chat_alege_conv">Alege o conversație</h3>
+                        <button id="btn-inapoi-conversatie-client" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;" class="btn-inchide-conversatie-mobile">✖</button>
+                    </div>
                     
                     <div class="lista-mesaje" id="chat-client-mesaje">
                         <p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;" data-i18n="chat_selecteaza_stanga">Selectează un teren din stânga pentru a vedea mesajele.</p>
