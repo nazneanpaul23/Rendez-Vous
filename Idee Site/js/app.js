@@ -254,13 +254,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-executa-login')?.addEventListener('click', async () => {
         const email = document.getElementById('login-email').value.trim(); const parola = document.getElementById('login-parola').value.trim();
         if(!email || !parola) return alert("Completati datele!");
-        const { data } = await db.from('clienti').select('*').eq('email', email).eq('parola', parola).single();
-        if (data) {
-            const safeUser = { id: data.id, nume: data.nume, email: data.email, telefon: data.telefon };
+        
+        const btn = document.getElementById('btn-executa-login');
+        const textInitial = btn.innerText;
+        btn.innerText = "⏳..."; btn.disabled = true;
+
+        // Autentificare prin Supabase Auth
+        const { data: authData, error: authError } = await db.auth.signInWithPassword({
+            email: email,
+            password: parola,
+        });
+
+        if (authError) {
+            btn.innerText = textInitial; btn.disabled = false;
+            return alert("Email sau parolă greșită! (Eroare Auth: " + authError.message + ")");
+        }
+
+        // Preluăm restul detaliilor (nume, telefon) din tabelul clienti vechi
+        const { data: clientData } = await db.from('clienti').select('*').eq('email', email).single();
+        
+        if (clientData) {
+            const safeUser = { id: clientData.id, nume: clientData.nume, email: clientData.email, telefon: clientData.telefon };
             loggedInUser = safeUser; 
             localStorage.setItem('user_session', JSON.stringify(safeUser));
             document.getElementById('modal-auth').style.display = 'none'; window.actualizeazaButonCont();
-        } else alert("Email sau parolă greșită!");
+        } else {
+            // Caz rar: s-a logat prin Auth dar nu e in tabel. Il logam oricum cu date minime.
+            const safeUser = { id: authData.user.id, nume: email.split('@')[0], email: email, telefon: "-" };
+            loggedInUser = safeUser; 
+            localStorage.setItem('user_session', JSON.stringify(safeUser));
+            document.getElementById('modal-auth').style.display = 'none'; window.actualizeazaButonCont();
+        }
+        
+        btn.innerText = textInitial; btn.disabled = false;
+    });
+
+    // --- RESETARE PAROLĂ (SUPABASE NATIV) ---
+    document.getElementById('btn-forgot-password')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = prompt("Te rugăm să introduci adresa de email pentru care dorești resetarea parolei:");
+        if (!email) return;
+
+        const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
+            redirectTo: window.location.origin + window.location.pathname,
+        });
+
+        if (error) {
+            alert("Eroare la trimiterea emailului de resetare: " + error.message);
+        } else {
+            alert("Ți-am trimis un link de resetare a parolei pe email! Verifică și folderul Spam.");
+        }
+    });
+
+    // --- INTERCEPTARE LINK RESETARE PAROLĂ NOUĂ ---
+    // Când clientul dă click pe link-ul din email, Supabase îl aduce pe site cu parametrii în URL
+    window.addEventListener('load', () => {
+        const hash = window.location.hash;
+        if (hash && hash.includes('type=recovery')) {
+            const nouaParola = prompt("Ai cerut resetarea parolei.\nTe rugăm să introduci NOUA PAROLĂ (minim 6 caractere):");
+            if (nouaParola && nouaParola.length >= 6) {
+                db.auth.updateUser({ password: nouaParola }).then(({ error }) => {
+                    if (error) alert("Eroare la actualizarea parolei: " + error.message);
+                    else {
+                        alert("Parola a fost schimbată cu succes! Te poți autentifica cu noua parolă.");
+                        window.location.hash = ''; // curățăm URL-ul
+                        document.getElementById('modal-auth').style.display = 'flex';
+                    }
+                });
+            } else {
+                alert("Parola trebuie să aibă minim 6 caractere. Reîncarcă pagina pentru a încerca din nou.");
+            }
+        }
     });
 
     document.getElementById('btn-executa-register')?.addEventListener('click', async () => {
@@ -270,15 +334,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parola = document.getElementById('reg-parola').value.trim();
         
         if(!nume || !email || !telefon || !parola) return alert("Completați toate câmpurile!");
+        if(parola.length < 6) return alert("Parola trebuie să aibă minim 6 caractere pentru securitate!");
         
         const btn = document.getElementById('btn-executa-register');
         btn.innerText = "⏳..."; btn.disabled = true;
-
-        const { data: verificareEmail } = await db.from('clienti').select('email').eq('email', email).single();
-        if (verificareEmail) {
-            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
-            return alert("Există deja un cont cu această adresă de email! Te rugăm să te conectezi pe el.");
-        }
 
         const { data: verificareTel } = await db.from('clienti').select('telefon').eq('telefon', telefon);
         if (verificareTel && verificareTel.length > 0) {
@@ -286,14 +345,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             return alert("Acest număr de telefon este deja folosit pentru alt cont! Nu poți crea mai multe conturi pe același număr.");
         }
 
-        const { error } = await db.from('clienti').insert([{ nume, email, telefon, parola }]);
+        // 1. Înregistrare în seiful Supabase Auth (Securitate)
+        const { data: authData, error: authError } = await db.auth.signUp({
+            email: email,
+            password: parola,
+        });
+
+        if (authError) {
+            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
+            if (authError.message.includes("already registered")) {
+                return alert("Există deja un cont cu această adresă de email! Te rugăm să te conectezi pe el.");
+            }
+            return alert("Eroare la securizarea contului: " + authError.message);
+        }
+
+        // 2. Înregistrare în tabelul vechi (pentru a funcționa Make.com, Rezervările și Chat-ul)
+        // Nu mai salvăm parola în text clar, pentru securitate! O punem "***" ca să știm că e în seif.
+        const { error: insertError } = await db.from('clienti').insert([{ nume, email, telefon }]);
+        
         btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
         
-        if (!error) {
-            alert("Cont creat cu succes! Te poți autentifica acum.");
+        if (!insertError) {
+            alert("Cont creat și securizat cu succes! Te poți autentifica acum.");
             document.getElementById('tab-login').click();
         } else {
-            alert("Eroare: " + error.message);
+            alert("Contul a fost securizat, dar a apărut o eroare la profil: " + insertError.message);
         }
     });
 
@@ -524,7 +600,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         let oreOcupateArray = rezervariOcupate ? rezervariOcupate.map(r => r.ora) : [];
         
         const oraCurenta = new Date().getHours(); 
+        const minutCurent = new Date().getMinutes();
         const esteZiuaDeAzi = (dataSelectataStr === aziStringFormatat);
+        
+        // SETARE: Cu câte ore înainte se poate face o rezervare cel târziu (Marjă de siguranță)
+        const ORE_AVANS_MINIM = 1; 
 
         // NOU: Verificăm ce a selectat clientul în filtru pentru Oră
         const filtruOraInput = document.getElementById('filtru-ora');
@@ -548,7 +628,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             let oraTxt = `${i}:00`; let btnOra = document.createElement('button');
             btnOra.className = 'btn-ora'; btnOra.innerText = oraTxt;
 
-            if (oreOcupateArray.includes(oraTxt) || (esteZiuaDeAzi && i <= oraCurenta)) {
+            // Calculăm dacă e prea din scurt
+            let estePreaDinScurt = false;
+            if (esteZiuaDeAzi) {
+                let minutePanaLaRezervare = (i * 60) - (oraCurenta * 60 + minutCurent);
+                if (minutePanaLaRezervare < (ORE_AVANS_MINIM * 60)) {
+                    estePreaDinScurt = true;
+                }
+            }
+
+            if (oreOcupateArray.includes(oraTxt) || estePreaDinScurt) {
                 btnOra.classList.add('ocupat'); 
                 btnOra.disabled = true; 
                 btnOra.innerText += oreOcupateArray.includes(oraTxt) ? ` (${window.dict[window.lang]['ocupat']})` : ` (${window.dict[window.lang]['trecut']})`;
@@ -919,9 +1008,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (avertismentChatClient) avertismentChatClient.style.display = 'none';
     });
 
-    // --------------------------------------------------
-    // RESTUL LOGICII DE LOGIN, REGISTER, INCARCARE ORE
-    // --------------------------------------------------
+    // Pornim Realtime la start dacă e logat
     if (loggedInUser) {
         initializareRealtimeChatClient();
     }
