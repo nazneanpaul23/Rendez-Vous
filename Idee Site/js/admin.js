@@ -315,19 +315,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('login-admin-btn')?.addEventListener('click', async () => {
+        const email = document.getElementById('login-email-admin').value.trim();
         const parola = document.getElementById('login-parola').value.trim();
-        if (!parola) return alert("Introdu o parolă!");
+        if (!email || !parola) return alert("Introdu adresa de email și parola!");
 
         const btn = document.getElementById('login-admin-btn');
-        btn.innerText = "Se verifică...";
+        const textVechi = btn.innerText;
+        btn.innerText = "Se verifică securitatea...";
+        btn.disabled = true;
         
-        const { data, error } = await db.from('users_admin').select('*').eq('parola', parola).single();
+        // 1. Verificare Auth Securizată
+        const { data: authData, error: authError } = await db.auth.signInWithPassword({
+            email: email,
+            password: parola,
+        });
+
+        if (authError) {
+            btn.innerText = textVechi; btn.disabled = false;
+            return alert("⛔ Acces respins! Email sau parolă greșită.");
+        }
+        
+        // 2. Extragere rol din tabelul users_admin pe baza email-ului
+        const { data, error } = await db.from('users_admin').select('*').eq('email', email).single();
         
         if (data && !error) {
             contLogatGlobal = data;
             document.getElementById('sectiune-login').style.display = 'none';
             document.getElementById('sectiune-dashboard').style.display = 'flex';
-            document.getElementById('text-rol-activ').innerText = window.lang === 'hu' ? `Bejelentkezve mint: ${contLogatGlobal.nume_admin}` : `Logat ca: ${contLogatGlobal.nume_admin}`;
+            document.getElementById('text-rol-activ').innerText = window.lang === 'hu' ? `Bejelentkezve mint: \n${contLogatGlobal.nume_admin}` : `Logat ca: ${contLogatGlobal.nume_admin}`;
             
             let terenuriPtTabel = []; 
 
@@ -447,7 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { initializareRealtimeChatAdmin(); }, 1000);
 
         } else {
-            alert("❌ Parolă incorectă!");
+            alert("⛔ Ești logat, dar contul tău nu are profil de Admin setat în baza de date!");
+            await db.auth.signOut();
         }
         btn.innerText = "Intră în Sistem";
     });
@@ -514,11 +530,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let dateDeUpdatat = { pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), este_activ: esteActiv, are_chat: areChat };
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            try { dateDeUpdatat.poza = await window.comprimaImagine(fileInput.files[0]); } 
-            catch(e) {
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${ext}`;
+            
+            const { error: uploadError } = await db.storage.from('poze_terenuri').upload(fileName, file);
+                
+            if (uploadError) {
                 if(btnSave) { btnSave.innerText = `💾 Salvează Setările pt ${numeTeren}`; btnSave.disabled = false; }
-                return alert("Eroare la procesarea pozei: " + e.message);
+                return alert("Eroare la urcarea pozei: " + uploadError.message);
             }
+            
+            const { data: publicUrlData } = db.storage.from('poze_terenuri').getPublicUrl(fileName);
+            dateDeUpdatat.poza = publicUrlData.publicUrl;
         }
 
         const { error } = await db.from('terenuri').update(dateDeUpdatat).eq('id', idDB);
@@ -575,14 +599,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nume || !pret || !locatie) return alert("Completează câmpurile!");
         const btn = document.getElementById('btn-adauga-teren'); btn.innerText = "⏳ Se salvează..."; btn.disabled = true;
 
-        let pozaBase64 = null;
+        let urlPoza = null;
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            try { pozaBase64 = await window.comprimaImagine(fileInput.files[0]); }
-            catch(e) { alert("Eroare poză!"); btn.innerText = "➕ Adaugă Teren"; btn.disabled = false; return; }
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${ext}`;
+            
+            // Urcăm fișierul fizic în Storage (Bucket: poze_terenuri)
+            const { data: uploadData, error: uploadError } = await db.storage
+                .from('poze_terenuri')
+                .upload(fileName, file);
+                
+            if (uploadError) {
+                alert("Eroare la urcarea pozei: " + uploadError.message);
+                btn.innerText = "➕ Adaugă Teren"; btn.disabled = false; 
+                return;
+            }
+            
+            // Extragem link-ul public către poză
+            const { data: publicUrlData } = db.storage.from('poze_terenuri').getPublicUrl(fileName);
+            urlPoza = publicUrlData.publicUrl;
         }
 
         const { error } = await db.from('terenuri').insert([{
-            nume, sport, pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), locatie, poza: pozaBase64, este_activ: true
+            nume, sport, pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), locatie, poza: urlPoza, este_activ: true
         }]);
         
         if (error) alert("❌ Eroare DB: " + error.message);
@@ -592,21 +632,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('creeaza-supervisor-btn')?.addEventListener('click', async () => {
         const nume = document.getElementById('super-nume').value.trim();
-        const parola = document.getElementById('super-parola').value.trim();
+        const email = document.getElementById('super-email').value.trim();
         const esteSuper = document.getElementById('check-super-admin').checked;
         const listaTerenuri = Array.from(document.querySelectorAll('.check-teren-alocat:checked')).map(cb => cb.value).join(','); 
 
-        if (!nume || !parola) return alert("Completează datele!");
-        if (!esteSuper && listaTerenuri === "") return alert("Bifează un teren!");
+        if (!nume || !email) return alert("Completează numele și adresa de mail!");
+        if (!esteSuper && listaTerenuri === "") return alert("Bifează măcar un teren!");
 
         const btn = document.getElementById('creeaza-supervisor-btn'); btn.innerText = "Se verifică...";
-        const { data: verificare } = await db.from('users_admin').select('id').eq('parola', parola);
-        if (verificare && verificare.length > 0) { btn.innerText = "Creează Angajat"; return alert("❌ Parola există deja!"); }
+        
+        // Verifică dacă adresa e deja alocată
+        const { data: verificare } = await db.from('users_admin').select('id').eq('email', email);
+        if (verificare && verificare.length > 0) { btn.innerText = "Alocă Terenuri"; return alert("❌ Acest E-mail este deja alocat unui angajat/admin!"); }
 
-        const { error } = await db.from('users_admin').insert([{ nume_admin: nume, parola, is_super: esteSuper, terenuri: esteSuper ? "ALL" : listaTerenuri }]);
-        if (!error) { alert(`✅ Cont creat!`); document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false); } 
-        else alert("Eroare: " + error.message);
-        btn.innerText = "Creează Angajat";
+        const { error } = await db.from('users_admin').insert([{ nume_admin: nume, email: email, is_super: esteSuper, terenuri: esteSuper ? "ALL" : listaTerenuri }]);
+        if (!error) { 
+            alert(`✅ Rol și Terenuri alocate cu succes! Nu uita să creezi parola pentru ${email} din contul tău Supabase.`); 
+            document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false); 
+            document.getElementById('super-nume').value = "";
+            document.getElementById('super-email').value = "";
+            document.getElementById('modal-creeaza-cont').style.display = 'none';
+        } else {
+            alert("Eroare: " + error.message);
+        }
+        btn.innerText = "Alocă Terenuri";
     });
 
     window.reincarcaIstoricAdmin = async function() {
