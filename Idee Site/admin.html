@@ -42,6 +42,7 @@
         <div id="sectiune-login" class="modal-continut" style="max-width: 400px; border-color: white;">
             <h2 class="titlu-modal" data-trad="t-logare">🔐 Logare Panou Control</h2>
             <div class="formular-auth">
+                <div class="grup-input"><label>Adresă Email:</label><input type="email" id="login-email-admin" required></div>
                 <div class="grup-input"><label>Parolă de acces:</label><input type="password" id="login-parola" required></div>
                 <button type="button" id="login-admin-btn" class="buton-rezervare" style="margin-top: 10px;">Intră în Sistem</button>
             </div>
@@ -124,16 +125,16 @@
         <div class="modal-continut modal-mare" style="border-color: #34c759; width: 100%; max-width: 550px;">
             <button class="buton-inchidere" onclick="this.parentElement.parentElement.style.display='none'">X</button>
             <div>
-                <h2 class="titlu-modal" style="font-size: 20px; text-align: left; color: #34c759;">💼 Cont Angajat Nou</h2>
-                <p style="color: #ccc; font-size: 13px; margin-top: -10px; margin-bottom: 10px;">(Oferă o parolă angajaților tăi)</p>
+                <h2 class="titlu-modal" style="font-size: 20px; text-align: left; color: #34c759;">🧑‍💼 Alocare Terenuri Angajat</h2>
+                <p style="color: #ccc; font-size: 13px; margin-top: -10px; margin-bottom: 10px;">(ATENȚIE: Contul cu parola trebuie creat întâi în Supabase Auth)</p>
             </div>
             <div class="formular-auth" style="display: flex; flex-direction: column; flex: 1;">
                 <div class="grup-input"><label>Nume Angajat / Admin</label><input type="text" id="super-nume"></div>
-                <div class="grup-input"><label>Parolă acces</label><input type="text" id="super-parola"></div>
+                <div class="grup-input"><label>Adresă E-mail (Creată în Supabase)</label><input type="email" id="super-email"></div>
                 <div class="grup-input"><label>Bifează terenurile la care are acces:</label>
                     <div id="container-checkbox-terenuri" style="display:flex; flex-direction:column; gap:5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;"></div>
                 </div>
-                <button type="button" id="creeaza-supervisor-btn" class="buton-rezervare" style="margin-top: 20px; background: #34c759; color: black;">Creează Angajat</button>
+                <button type="button" id="creeaza-supervisor-btn" class="buton-rezervare" style="margin-top: 20px; background: #34c759; color: black;">Alocă Terenuri</button>
             </div>
         </div>
     </div>
