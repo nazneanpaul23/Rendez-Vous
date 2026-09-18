@@ -311,19 +311,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('load', () => {
         const hash = window.location.hash;
         if (hash && hash.includes('type=recovery')) {
-            const nouaParola = prompt("Ai cerut resetarea parolei.\nTe rugăm să introduci NOUA PAROLĂ (minim 6 caractere):");
-            if (nouaParola && nouaParola.length >= 6) {
-                db.auth.updateUser({ password: nouaParola }).then(({ error }) => {
-                    if (error) alert("Eroare la actualizarea parolei: " + error.message);
-                    else {
-                        alert("Parola a fost schimbată cu succes! Te poți autentifica cu noua parolă.");
-                        window.location.hash = ''; // curățăm URL-ul
-                        document.getElementById('modal-auth').style.display = 'flex';
-                    }
-                });
-            } else {
-                alert("Parola trebuie să aibă minim 6 caractere. Reîncarcă pagina pentru a încerca din nou.");
-            }
+            // Pe telefoane (Safari/Chrome), prompt-urile automate sunt blocate.
+            // Creăm un ecran HTML vizual de resetare.
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
+            overlay.innerHTML = `
+                <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
+                    <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
+                    <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
+                    <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
+                    <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
+                const noua = document.getElementById('input-noua-parola').value;
+                if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+                
+                const btn = document.getElementById('btn-salveaza-parola');
+                btn.innerText = "⏳ Se salvează...";
+                btn.disabled = true;
+                
+                const { error } = await db.auth.updateUser({ password: noua });
+                if (error) {
+                    alert("❌ Eroare: " + error.message);
+                    btn.innerText = "Salvează Noua Parolă";
+                    btn.disabled = false;
+                } else {
+                    alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
+                    document.body.removeChild(overlay);
+                    window.location.hash = ''; // curățăm link-ul
+                    document.getElementById('modal-auth').style.display = 'flex';
+                }
+            });
         }
     });
 
