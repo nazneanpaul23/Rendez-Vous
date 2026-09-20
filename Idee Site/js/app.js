@@ -307,12 +307,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- INTERCEPTARE LINK RESETARE PAROLĂ NOUĂ ---
-    // Când clientul dă click pe link-ul din email, Supabase îl aduce pe site cu parametrii în URL
-    window.addEventListener('load', () => {
-        const hash = window.location.hash;
-        if (hash && hash.includes('type=recovery')) {
-            // Pe telefoane (Safari/Chrome), prompt-urile automate sunt blocate.
-            // Creăm un ecran HTML vizual de resetare.
+    db.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
             overlay.innerHTML = `
@@ -341,7 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
                     document.body.removeChild(overlay);
-                    window.location.hash = ''; // curățăm link-ul
+                    window.location.hash = ''; 
+                    window.history.replaceState({}, document.title, window.location.pathname);
                     document.getElementById('modal-auth').style.display = 'flex';
                 }
             });
