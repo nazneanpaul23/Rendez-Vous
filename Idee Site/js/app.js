@@ -141,12 +141,49 @@ window.schimbaLimba = function(limbaNoua) {
     }
 };
 
-
 // ==========================================
 // 1. LOGICA APLICAȚIEI
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    
+
+    // --- MUTĂ BLOCUL DE INTERCEPTARE AICI, LA ÎNCEPUT DE TOT! ---
+    if (window.location.href.includes('reset=true') || window.location.href.includes('type=recovery')) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
+        overlay.innerHTML = `
+            <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
+                <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
+                <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
+                <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
+                <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
+            const noua = document.getElementById('input-noua-parola').value;
+            if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+            
+            const btn = document.getElementById('btn-salveaza-parola');
+            btn.innerText = "⏳ Se salvează...";
+            btn.disabled = true;
+            
+            const { error } = await db.auth.updateUser({ password: noua });
+            if (error) {
+                alert("❌ Eroare: " + error.message);
+                btn.innerText = "Salvează Noua Parolă";
+                btn.disabled = false;
+            } else {
+                alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
+                document.body.removeChild(overlay);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                document.getElementById('modal-auth').style.display = 'flex';
+            }
+        });
+    }
+    // --- GATA BLOCUL DE INTERCEPTARE ---
+
+    // ... aici continuă codul tău normal:
     let loggedInUser = JSON.parse(localStorage.getItem('user_session')) || null;
     let terenuriDinDB = []; 
     let sportCurent = "", terenCurent = "", pretTerenCurent = 0, pretMingeCurent = 15;
@@ -155,48 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.schimbaLimba(window.lang);
 
     const aziD = new Date();
-    const numeZileT_DB = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
-    const aziStringFormatat = `${numeZileT_DB[aziD.getDay()]}, ${String(aziD.getDate()).padStart(2, '0')}.${String(aziD.getMonth() + 1).padStart(2, '0')}`;
-
-    async function incarcaTerenuri() {
-        const { data, error } = await db.from('terenuri').select('*');
-        if (data && !error) terenuriDinDB = data;
-    }
-    await incarcaTerenuri();
-
-    const btnTopCont = document.getElementById('btn-top-cont');
-    
-    window.actualizeazaButonCont = function() {
-        const textTopCont = document.getElementById('text-top-cont');
-        if(textTopCont) {
-            textTopCont.innerText = loggedInUser ? window.dict[window.lang]['contul_meu'] : window.dict[window.lang]['login_cont'];
-        }
-    };
-    window.actualizeazaButonCont();
-
-    if (btnTopCont) {
-        btnTopCont.addEventListener('click', async () => {
-            if (loggedInUser) {
-                if(document.getElementById('profil-nume')) document.getElementById('profil-nume').innerText = loggedInUser.nume || "Nume Nesetat";
-                document.getElementById('profil-email').innerText = loggedInUser.email;
-                if(document.getElementById('profil-telefon')) document.getElementById('profil-telefon').innerText = loggedInUser.telefon || "-";
-                
-                const nrActiveSpan = document.getElementById('nr-active');
-                if (nrActiveSpan) {
-                    const { data } = await db.from('rezervari').select('data_str, ora, stare, timestamp_start').eq('email_client', loggedInUser.email.trim()).neq('stare', 'anulata');
-                    let nrReale = 0;
-                    if (data) {
-                        data.forEach(r => {
-                            if (!window.esteRezervareTrecuta(r.data_str, r.ora, r.timestamp_start)) nrReale++;
-                        });
-                    }
-                    nrActiveSpan.innerText = nrReale;
-                }
-                document.getElementById('modal-profil').style.display = 'flex';
-            } else document.getElementById('modal-auth').style.display = 'flex';
-        });
-    }
-
+    // ...
     // --- ESC PENTRU A ÎNCHIDE ORICE MODAL ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
