@@ -4,37 +4,37 @@
 window.dict = {
     'ro': {
         'contul_meu': 'Contul Meu', 'login_cont': 'Login / Cont', 'fotbal': 'Fotbal', 'baschet': 'Baschet', 'tenis': 'Tenis', 'volei': 'Volei',
-        'autentificare': 'Autentificare', 'creare_cont': 'Creare Cont', 'email': 'Adres─â Email', 'parola': 'Parol─â', 'telefon': 'Num─âr de Telefon',
+        'autentificare': 'Autentificare', 'creare_cont': 'Creare Cont', 'email': 'Adresă Email', 'parola': 'Parolă', 'telefon': 'Număr de Telefon',
         'nume_complet': 'Nume Complet (Username)',
-        'intra_cont': 'Intr─â ├«n cont', 'btn_creare_cont': 'Creeaz─â Cont', 'profil_titlu': 'Profilul T─âu', 'rez_active': 'Rezerv─âri Active',
-        'istoric': 'Istoric Rezerv─âri', 'deconectare': 'Deconectare', 'inapoi_profil': '├Änapoi la Profil', 'alege_terenul': 'Alege Terenul',
-        'data_dorita': 'Data Dorit─â', 'ora_dorita': 'Ora Dorit─â', 'toate_orele': 'Toate Orele', 'inapoi': '├Änapoi',
+        'intra_cont': 'Intră în cont', 'btn_creare_cont': 'Creează Cont', 'profil_titlu': 'Profilul Tău', 'rez_active': 'Rezervări Active',
+        'istoric': 'Istoric Rezervări', 'deconectare': 'Deconectare', 'inapoi_profil': 'Înapoi la Profil', 'alege_terenul': 'Alege Terenul',
+        'data_dorita': 'Data Dorită', 'ora_dorita': 'Ora Dorită', 'toate_orele': 'Toate Orele', 'inapoi': 'Înapoi',
         'finalizare_rezervare': 'Finalizare Rezervare', 'nevoie_minge': 'Ai nevoie de minge?', 'alege_ziua': 'Alege Ziua', 
-        'alege_ora': 'Alege Ora (Po╚¢i selecta mai multe)', 'disclaimer': 'ΓÜá∩╕Å Aten╚¢ie: Rezervarea poate fi anulat─â gratuit doar cu cel pu╚¢in 6 ore ├«nainte de ora ├«nceperii.',
-        'vezi_locatia': 'Vezi Loca╚¢ia (Hart─â)', 'alegeti_o_ora': 'Alege╚¢i o or─â', 'zile': ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "S├óm"], 'azi': 'Azi', 'maine': 'M├óine',
-        'lei_ora': 'Lei/or─â', 'ocupat': 'Ocupat', 'trecut': 'Trecut', 'rezerva': 'Rezerv─â', 'se_cauta': 'Se caut─â terenuri disponibile...',
-        'fara_rezervari': 'Nu ai rezerv─âri momentan.', 'anuleaza': 'Γ¥î Anuleaz─â (Gratuit)',
-        'chat_btn': 'Chat', 'rez_active_titlu': 'Rezerv─ârile Tale Active', 'chat_titlu': '≡ƒÆ¼ Mesaje Chat',
-        'chat_cauta_conv': 'Se caut─â conversa╚¢ii...', 'chat_alege_conv': 'Alege o conversa╚¢ie',
-        'chat_selecteaza_stanga': 'Selecteaz─â un teren din st├ónga pentru a vedea mesajele.', 'chat_scrie': 'Scrie un mesaj...',
+        'alege_ora': 'Alege Ora (Poți selecta mai multe)', 'disclaimer': '⚠️ Atenție: Rezervarea poate fi anulată gratuit doar cu cel puțin 6 ore înainte de ora începerii.',
+        'vezi_locatia': 'Vezi Locația (Hartă)', 'alegeti_o_ora': 'Alegeți o oră', 'zile': ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"], 'azi': 'Azi', 'maine': 'Mâine',
+        'lei_ora': 'Lei/oră', 'ocupat': 'Ocupat', 'trecut': 'Trecut', 'rezerva': 'Rezervă', 'se_cauta': 'Se caută terenuri disponibile...',
+        'fara_rezervari': 'Nu ai rezervări momentan.', 'anuleaza': '❌ Anulează (Gratuit)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Rezervările Tale Active', 'chat_titlu': '💬 Mesaje Chat',
+        'chat_cauta_conv': 'Se caută conversații...', 'chat_alege_conv': 'Alege o conversație',
+        'chat_selecteaza_stanga': 'Selectează un teren din stânga pentru a vedea mesajele.', 'chat_scrie': 'Scrie un mesaj...',
         'chat_avertisment': 'Este nevoie de rezervare pentru a trimite un chat'
     },
     'hu': {
-        'contul_meu': 'Fi├│kom', 'login_cont': 'Bel├⌐p├⌐s / Fi├│k', 'fotbal': 'Foci', 'baschet': 'Kos├írlabda', 'tenis': 'Tenisz', 'volei': 'R├╢plabda',
-        'autentificare': 'Bejelentkez├⌐s', 'creare_cont': 'Regisztr├íci├│', 'email': 'E-mail c├¡m', 'parola': 'Jelsz├│', 'telefon': 'Telefonsz├ím',
-        'nume_complet': 'Teljes N├⌐v (Felhaszn├íl├│n├⌐v)',
-        'intra_cont': 'Bel├⌐p├⌐s', 'btn_creare_cont': 'Fi├│k l├⌐trehoz├ísa', 'profil_titlu': 'Profilod', 'rez_active': 'Akt├¡v foglal├ísok',
-        'istoric': 'Foglal├ísi el┼æzm├⌐nyek', 'deconectare': 'Kijelentkez├⌐s', 'inapoi_profil': 'Vissza a profilhoz', 'alege_terenul': 'P├ílya kiv├ílaszt├ísa',
-        'data_dorita': 'K├¡v├ínt d├ítum', 'ora_dorita': 'K├¡v├ínt id┼æpont', 'toate_orele': 'Minden id┼æpont', 'inapoi': 'Vissza',
-        'finalizare_rezervare': 'Foglal├ís v├⌐gleges├¡t├⌐se', 'nevoie_minge': 'Sz├╝ks├⌐ged van labd├íra?', 'alege_ziua': 'V├ílassz napot', 
-        'alege_ora': 'V├ílassz id┼æpontot (t├╢bbet is lehet)', 'disclaimer': 'ΓÜá∩╕Å Figyelem: A foglal├ís ingyenesen lemondhat├│ a kezd├⌐s el┼ætt legal├íbb 6 ├│r├íval.',
-        'vezi_locatia': 'Helysz├¡n (T├⌐rk├⌐p)', 'alegeti_o_ora': 'V├ílassz id┼æpontot', 'zile': ["Vas", "H├⌐t", "Ked", "Sze", "Cs├╝", "P├⌐n", "Szo"], 'azi': 'Ma', 'maine': 'Holnap',
-        'lei_ora': 'RON/├│ra', 'ocupat': 'Foglalt', 'trecut': 'Elm├║lt', 'rezerva': 'Foglal├ís', 'se_cauta': 'Szabad p├íly├ík keres├⌐se...',
-        'fara_rezervari': 'Jelenleg nincsenek foglal├ísaid.', 'anuleaza': 'Γ¥î Lemond├ís (Ingyenes)',
-        'chat_btn': 'Chat', 'rez_active_titlu': 'Akt├¡v foglal├ísaid', 'chat_titlu': '≡ƒÆ¼ Chat ├╝zenetek',
-        'chat_cauta_conv': 'Besz├⌐lget├⌐sek keres├⌐se...', 'chat_alege_conv': 'V├ílassz egy besz├⌐lget├⌐st',
-        'chat_selecteaza_stanga': 'V├ílassz egy p├íly├ít balr├│l az ├╝zenetek megtekint├⌐s├⌐hez.', 'chat_scrie': '├ìrj egy ├╝zenetet...',
-        'chat_avertisment': '├£zenet k├╝ld├⌐s├⌐hez akt├¡v foglal├ís sz├╝ks├⌐ges'
+        'contul_meu': 'Fiókom', 'login_cont': 'Belépés / Fiók', 'fotbal': 'Foci', 'baschet': 'Kosárlabda', 'tenis': 'Tenisz', 'volei': 'Röplabda',
+        'autentificare': 'Bejelentkezés', 'creare_cont': 'Regisztráció', 'email': 'E-mail cím', 'parola': 'Jelszó', 'telefon': 'Telefonszám',
+        'nume_complet': 'Teljes Név (Felhasználónév)',
+        'intra_cont': 'Belépés', 'btn_creare_cont': 'Fiók létrehozása', 'profil_titlu': 'Profilod', 'rez_active': 'Aktív foglalások',
+        'istoric': 'Foglalási előzmények', 'deconectare': 'Kijelentkezés', 'inapoi_profil': 'Vissza a profilhoz', 'alege_terenul': 'Pálya kiválasztása',
+        'data_dorita': 'Kívánt dátum', 'ora_dorita': 'Kívánt időpont', 'toate_orele': 'Minden időpont', 'inapoi': 'Vissza',
+        'finalizare_rezervare': 'Foglalás véglegesítése', 'nevoie_minge': 'Szükséged van labdára?', 'alege_ziua': 'Válassz napot', 
+        'alege_ora': 'Válassz időpontot (többet is lehet)', 'disclaimer': '⚠️ Figyelem: A foglalás ingyenesen lemondható a kezdés előtt legalább 6 órával.',
+        'vezi_locatia': 'Helyszín (Térkép)', 'alegeti_o_ora': 'Válassz időpontot', 'zile': ["Vas", "Hét", "Ked", "Sze", "Csü", "Pén", "Szo"], 'azi': 'Ma', 'maine': 'Holnap',
+        'lei_ora': 'RON/óra', 'ocupat': 'Foglalt', 'trecut': 'Elmúlt', 'rezerva': 'Foglalás', 'se_cauta': 'Szabad pályák keresése...',
+        'fara_rezervari': 'Jelenleg nincsenek foglalásaid.', 'anuleaza': '❌ Lemondás (Ingyenes)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Aktív foglalásaid', 'chat_titlu': '💬 Chat üzenetek',
+        'chat_cauta_conv': 'Beszélgetések keresése...', 'chat_alege_conv': 'Válassz egy beszélgetést',
+        'chat_selecteaza_stanga': 'Válassz egy pályát balról az üzenetek megtekintéséhez.', 'chat_scrie': 'Írj egy üzenetet...',
+        'chat_avertisment': 'Üzenet küldéséhez aktív foglalás szükséges'
     },
     'en': {
         'contul_meu': 'My Account', 'login_cont': 'Login / Account', 'fotbal': 'Football', 'baschet': 'Basketball', 'tenis': 'Tennis', 'volei': 'Volleyball',
@@ -44,11 +44,11 @@ window.dict = {
         'istoric': 'Booking History', 'deconectare': 'Logout', 'inapoi_profil': 'Back to Profile', 'alege_terenul': 'Choose Court',
         'data_dorita': 'Desired Date', 'ora_dorita': 'Desired Time', 'toate_orele': 'All Hours', 'inapoi': 'Back',
         'finalizare_rezervare': 'Finalize Booking', 'nevoie_minge': 'Need a ball?', 'alege_ziua': 'Choose Day', 
-        'alege_ora': 'Choose Time (Select multiple)', 'disclaimer': 'ΓÜá∩╕Å Warning: Free cancellation is only available up to 6 hours before start time.',
+        'alege_ora': 'Choose Time (Select multiple)', 'disclaimer': '⚠️ Warning: Free cancellation is only available up to 6 hours before start time.',
         'vezi_locatia': 'View Location (Map)', 'alegeti_o_ora': 'Choose a time', 'zile': ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], 'azi': 'Today', 'maine': 'Tomorrow',
         'lei_ora': 'RON/hour', 'ocupat': 'Booked', 'trecut': 'Passed', 'rezerva': 'Book', 'se_cauta': 'Searching for available courts...',
-        'fara_rezervari': 'You have no bookings at the moment.', 'anuleaza': 'Γ¥î Cancel (Free)',
-        'chat_btn': 'Chat', 'rez_active_titlu': 'Your Active Bookings', 'chat_titlu': '≡ƒÆ¼ Chat Messages',
+        'fara_rezervari': 'You have no bookings at the moment.', 'anuleaza': '❌ Cancel (Free)',
+        'chat_btn': 'Chat', 'rez_active_titlu': 'Your Active Bookings', 'chat_titlu': '💬 Chat Messages',
         'chat_cauta_conv': 'Searching for conversations...', 'chat_alege_conv': 'Choose a conversation',
         'chat_selecteaza_stanga': 'Select a court from the left to view messages.', 'chat_scrie': 'Type a message...',
         'chat_avertisment': 'An active booking is required to send a message'
@@ -56,9 +56,9 @@ window.dict = {
 };
 
 window.lang = localStorage.getItem('limba_app') || 'ro';
-window.tipIstoricDeschis = null; // Stocheaz─â ce tip de istoric este deschis ("active" sau "istoric")
+window.tipIstoricDeschis = null; // Stochează ce tip de istoric este deschis ("active" sau "istoric")
 
-// Func╚¢ie global─â utilitar─â pentru traducerea automat─â a zilelor re╚¢inute ├«n BD
+// Funcție globală utilitară pentru traducerea automată a zilelor reținute în BD
 window.traduData = function(dataStrDB) {
     if (!dataStrDB) return "";
     const parts = dataStrDB.split(', ');
@@ -68,10 +68,10 @@ window.traduData = function(dataStrDB) {
             return `${window.dict[window.lang]['zile'][indexZi]}, ${parts[1]}`;
         }
     }
-    return dataStrDB; // Fallback, returneaz─â textul netradus
+    return dataStrDB; // Fallback, returnează textul netradus
 };
 
-// Func╚¢ie global─â pentru verificarea exact─â a timpului (╚¢in├ónd cont de anul cre─ârii)
+// Funcție globală pentru verificarea exactă a timpului (ținând cont de anul creării)
 window.esteRezervareTrecuta = function(dataStr, ora, timestamp_start) {
     if (!dataStr || !ora) return false;
     const matchData = dataStr.match(/\d{1,2}\.\d{1,2}/); 
@@ -110,7 +110,7 @@ window.schimbaLimba = function(limbaNoua) {
         }
     });
 
-    // Colorare ╚Öi Eviden╚¢iere buton limb─â (Activ)
+    // Colorare și Evidențiere buton limbă (Activ)
     document.querySelectorAll('.btn-lang').forEach(btn => {
         if (btn.id === `btn-lang-${limbaNoua}`) {
             btn.style.background = '#34c759'; // Verde aprins
@@ -130,12 +130,12 @@ window.schimbaLimba = function(limbaNoua) {
         window.genereazaZile();
     }
     
-    // Re├«nc─ârcare Istoric Client dac─â este deschis, pentru traducerea ├«n timp real a zilelor
+    // Reîncărcare Istoric Client dacă este deschis, pentru traducerea în timp real a zilelor
     if (document.getElementById('modal-lista-rezervari')?.style.display === 'flex' && typeof window.reincarcaIstoricCurent === 'function') {
         window.reincarcaIstoricCurent();
     }
     
-    // Re├«nc─ârcare Istoric Admin (pentru admin.js) dac─â e deschis pe ecran
+    // Reîncărcare Istoric Admin (pentru admin.js) dacă e deschis pe ecran
     if (document.getElementById('container-istoric')?.style.display === 'flex' && typeof window.reincarcaIstoricAdmin === 'function') {
         window.reincarcaIstoricAdmin();
     }
@@ -143,9 +143,44 @@ window.schimbaLimba = function(limbaNoua) {
 
 
 // ==========================================
-// 1. LOGICA APLICA╚ÜIEI
+// 1. LOGICA APLICAΓòÜ├£IEI
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
+
+    if (window.location.href.includes('reset=true') || window.location.href.includes('type=recovery')) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
+        overlay.innerHTML = `
+            <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
+                <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
+                <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
+                <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
+                <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
+            const noua = document.getElementById('input-noua-parola').value;
+            if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+            
+            const btn = document.getElementById('btn-salveaza-parola');
+            btn.innerText = "⏳ Se salvează...";
+            btn.disabled = true;
+            
+            const { error } = await db.auth.updateUser({ password: noua });
+            if (error) {
+                alert("❌ Eroare: " + error.message);
+                btn.innerText = "Salvează Noua Parolă";
+                btn.disabled = false;
+            } else {
+                alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
+                document.body.removeChild(overlay);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                document.getElementById('modal-auth').style.display = 'flex';
+            }
+        });
+    }
     
     let loggedInUser = JSON.parse(localStorage.getItem('user_session')) || null;
     let terenuriDinDB = []; 
@@ -155,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.schimbaLimba(window.lang);
 
     const aziD = new Date();
-    const numeZileT_DB = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "S├óm"];
+    const numeZileT_DB = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
     const aziStringFormatat = `${numeZileT_DB[aziD.getDay()]}, ${String(aziD.getDate()).padStart(2, '0')}.${String(aziD.getMonth() + 1).padStart(2, '0')}`;
 
     async function incarcaTerenuri() {
@@ -197,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- ESC PENTRU A ├ÄNCHIDE ORICE MODAL ---
+    // --- ESC PENTRU A ÎNCHIDE ORICE MODAL ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari', 'modal-chat-client'];
@@ -257,7 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const btn = document.getElementById('btn-executa-login');
         const textInitial = btn.innerText;
-        btn.innerText = "ΓÅ│..."; btn.disabled = true;
+        btn.innerText = "⏳..."; btn.disabled = true;
 
         // Autentificare prin Supabase Auth
         const { data: authData, error: authError } = await db.auth.signInWithPassword({
@@ -267,10 +302,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (authError) {
             btn.innerText = textInitial; btn.disabled = false;
-            return alert("Email sau parol─â gre╚Öit─â! (Eroare Auth: " + authError.message + ")");
+            return alert("Email sau parolă greșită! (Eroare Auth: " + authError.message + ")");
         }
 
-        // Prelu─âm restul detaliilor (nume, telefon) din tabelul clienti vechi
+        // Preluăm restul detaliilor (nume, telefon) din tabelul clienti vechi
         const { data: clientData } = await db.from('clienti').select('*').eq('email', email).single();
         
         if (clientData) {
@@ -289,10 +324,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.innerText = textInitial; btn.disabled = false;
     });
 
-    // --- RESETARE PAROL─é (SUPABASE NATIV) ---
+    // --- RESETARE PAROLΓöÇ├⌐ (SUPABASE NATIV) ---
     document.getElementById('btn-forgot-password')?.addEventListener('click', async (e) => {
         e.preventDefault();
-        const email = prompt("Te rug─âm s─â introduci adresa de email pentru care dore╚Öti resetarea parolei:");
+        const email = prompt("Te rugăm să introduci adresa de email pentru care dorești resetarea parolei:");
         if (!email) return;
 
         const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
@@ -302,47 +337,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (error) {
             alert("Eroare la trimiterea emailului de resetare: " + error.message);
         } else {
-            alert("╚Üi-am trimis un link de resetare a parolei pe email! Verific─â ╚Öi folderul Spam.");
+            alert("ΓòÜ├£i-am trimis un link de resetare a parolei pe email! Verifică și folderul Spam.");
         }
     });
 
-       // --- INTERCEPTARE LINK RESETARE PAROL─é NOU─é ---
-    if (window.location.href.includes('reset=true') || window.location.href.includes('type=recovery')) {
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
-        overlay.innerHTML = `
-            <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
-                <h2 style="color:white;margin-bottom:15px;font-size:22px;">≡ƒöÉ Reseteaz─â Parola</h2>
-                <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parol─â mai jos (minim 6 caractere).</p>
-                <input type="password" id="input-noua-parola" placeholder="Noua parol─â..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
-                <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salveaz─â Noua Parol─â</button>
-            </div>
-        `;
-        document.body.appendChild(overlay);
+       // --- INTERCEPTARE LINK RESETARE PAROLΓöÇ├⌐ NOUΓöÇ├⌐ ---
 
-        document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
-            const noua = document.getElementById('input-noua-parola').value;
-            if(noua.length < 6) return alert("Parola trebuie s─â aib─â minim 6 caractere!");
-            
-            const btn = document.getElementById('btn-salveaza-parola');
-            btn.innerText = "ΓÅ│ Se salveaz─â...";
-            btn.disabled = true;
-            
-            const { error } = await db.auth.updateUser({ password: noua });
-            if (error) {
-                alert("Γ¥î Eroare: " + error.message);
-                btn.innerText = "Salveaz─â Noua Parol─â";
-                btn.disabled = false;
-            } else {
-                alert("Γ£à Parola a fost schimbat─â cu succes! Te po╚¢i loga pe site cu ea.");
-                document.body.removeChild(overlay);
-                window.history.replaceState({}, document.title, window.location.pathname);
-                document.getElementById('modal-auth').style.display = 'flex';
-            }
-        });
-    }
 
-    // --- ISTORIC REZERV─éRI ---
+    // --- ISTORIC REZERVΓöÇ├⌐RI ---
     window.reincarcaIstoricCurent = function() {
         if(loggedInUser && window.tipIstoricDeschis) {
             deschideIstoric(window.tipIstoricDeschis);
@@ -356,7 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         document.getElementById('titlu-lista-rezervari').innerText = tip === 'active' ? window.dict[window.lang]['rez_active'] : window.dict[window.lang]['istoric'];
         const container = document.getElementById('container-rezervari');
-        container.innerHTML = `<p style="color:white; text-align:center;">ΓÅ│</p>`;
+        container.innerHTML = `<p style="color:white; text-align:center;">⏳</p>`;
 
         const { data, error } = await db.from('rezervari').select('*').ilike('email_client', loggedInUser.email.trim());
         container.innerHTML = "";
@@ -392,14 +394,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const terenAsociat = terenuriDinDB.find(t => t.nume === r.teren);
             const linkLocatie = (terenAsociat && terenAsociat.locatie) ? terenAsociat.locatie : '';
             const onClickLocatie = linkLocatie ? `window.open('${linkLocatie}', '_blank')` : `alert('Error')`;
-            const butonLocatie = `<button onclick="${onClickLocatie}" style="margin-top: 10px; margin-right: 10px; background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">≡ƒôì ${window.dict[window.lang]['vezi_locatia'].split(' ')[0]}</button>`;
+            const butonLocatie = `<button onclick="${onClickLocatie}" style="margin-top: 10px; margin-right: 10px; background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">📍 ${window.dict[window.lang]['vezi_locatia'].split(' ')[0]}</button>`;
             
             const dataTradusa = window.traduData(r.data_str);
 
             container.innerHTML += `
                 <div style="background: rgba(255,255,255,0.05); border: 1px solid ${culoareBorder}; padding: 15px; border-radius: 8px; color: white; margin-bottom: 10px; opacity: ${opacitate};">
-                    <h4 style="margin: 0 0 10px 0; color: ${culoareTitlu};">ΓÜ╜ ${r.sport} - ${r.teren} ${textExtra}</h4>
-                    <p style="margin: 5px 0;">≡ƒôà ${dataTradusa} | ΓÅ░ ${r.ora}</p>
+                    <h4 style="margin: 0 0 10px 0; color: ${culoareTitlu};">⚽ ${r.sport} - ${r.teren} ${textExtra}</h4>
+                    <p style="margin: 5px 0;">📅 ${dataTradusa} | ⏰ ${r.ora}</p>
                     <p style="margin: 5px 0;">Total: <strong>${r.pret_total}</strong></p>
                     <div style="display: flex; flex-wrap: wrap;">${butonLocatie}${butonAnulare}</div>
                 </div>
@@ -557,13 +559,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function incarcaOreDinSupabase() {
         oraSelectata = []; actualizeazaButonFinal();
         const containerOre = document.getElementById('container-ore');
-        containerOre.innerHTML = '<p style="grid-column: span 4; text-align:center;">ΓÅ│...</p>';
+        containerOre.innerHTML = '<p style="grid-column: span 4; text-align:center;">⏳...</p>';
 
-        const requestDay = dataSelectataStr; // Salveaz─â data pentru care se face cererea curent─â
+        const requestDay = dataSelectataStr; // Salvează data pentru care se face cererea curentă
         const { data: rezervariOcupate } = await db.from('rezervari')
             .select('ora').eq('teren', terenCurent).eq('data_str', dataSelectataStr).neq('stare', 'anulata');
             
-        // Dac─â utilizatorul a dat click pe alt─â zi c├ót timp a╚Öteptam baza de date, abandon─âm afi╚Öarea veche
+        // Dacă utilizatorul a dat click pe altă zi cât timp așteptam baza de date, abandonăm afișarea veche
         if (requestDay !== dataSelectataStr) return;
 
         let oreOcupateArray = rezervariOcupate ? rezervariOcupate.map(r => r.ora) : [];
@@ -572,14 +574,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const minutCurent = new Date().getMinutes();
         const esteZiuaDeAzi = (dataSelectataStr === aziStringFormatat);
         
-        // SETARE: Cu c├óte ore ├«nainte se poate face o rezervare cel t├órziu (Marj─â de siguran╚¢─â)
+        // SETARE: Cu câte ore înainte se poate face o rezervare cel târziu (Marjă de siguranță)
         const ORE_AVANS_MINIM = 1; 
 
-        // NOU: Verific─âm ce a selectat clientul ├«n filtru pentru Or─â
+        // NOU: Verificăm ce a selectat clientul în filtru pentru Oră
         const filtruOraInput = document.getElementById('filtru-ora');
         const oraCautataInFiltru = filtruOraInput ? filtruOraInput.value : 'ALL';
         
-        // Verific─âm dac─â suntem fix pe ziua c─âutat─â ├«n filtru
+        // Verificăm dacă suntem fix pe ziua căutată în filtru
         let suntemPeZiuaCautata = false;
         const filtruDataInput = document.getElementById('filtru-data');
         if (filtruDataInput && filtruDataInput.value) {
@@ -597,7 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let oraTxt = `${i}:00`; let btnOra = document.createElement('button');
             btnOra.className = 'btn-ora'; btnOra.innerText = oraTxt;
 
-            // Calcul─âm dac─â e prea din scurt
+            // Calculăm dacă e prea din scurt
             let estePreaDinScurt = false;
             if (esteZiuaDeAzi) {
                 let minutePanaLaRezervare = (i * 60) - (oraCurenta * 60 + minutCurent);
@@ -613,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 btnOra.addEventListener('click', () => toggleOra(btnOra, oraTxt));
                 
-                // Dac─â ora curent─â corespunde cu cea din filtru, o bif─âm automat
+                // Dacă ora curentă corespunde cu cea din filtru, o bifăm automat
                 if (suntemPeZiuaCautata && oraCautataInFiltru === oraTxt) {
                     btnOra.classList.add('selectat');
                     oraSelectata.push(oraTxt);
@@ -622,7 +624,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             containerOre.appendChild(btnOra);
         }
         
-        actualizeazaButonFinal(); // Reactualiz─âm butonul de rezervare ca s─â fie verde ╚Öi gata de plat─â
+        actualizeazaButonFinal(); // Reactualizăm butonul de rezervare ca să fie verde și gata de plată
     }
 
     function toggleOra(btn, ora) {
@@ -661,7 +663,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let costOra = pretDoarTeren;
             let textPret = `${costOra} RON`;
             
-            // Ad─âug─âm pre╚¢ul mingii DOAR la prima or─â rezervat─â din pachet, ca s─â nu d─âm numere cu virgul─â ciudate
+            // Adăugăm prețul mingii DOAR la prima oră rezervată din pachet, ca să nu dăm numere cu virgulă ciudate
             if (index === 0 && mingeBifata) {
                 costOra += pretMingeCurent;
                 textPret = `${costOra} RON (+Minge)`;
@@ -683,9 +685,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let erori = error ? 1 : 0;
         if (error && error.code === '23505') {
-            alert("Aten╚¢ie: Una sau mai multe ore selectate tocmai au fost rezervate de altcineva. V─â rug─âm s─â re├«nc─ârca╚¢i ╚Öi s─â alege╚¢i alt─â or─â.");
+            alert("Atenție: Una sau mai multe ore selectate tocmai au fost rezervate de altcineva. Vă rugăm să reîncărcați și să alegeți altă oră.");
         } else if (error) {
-            alert("Eroare la salvarea rezerv─ârii: " + error.message);
+            alert("Eroare la salvarea rezervării: " + error.message);
         }
 
         if (erori === 0) { document.getElementById('modal-rezervare').style.display = 'none'; } 
@@ -693,7 +695,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ----------------------------------------
-    // REALTIME REZERV─éRI (pentru update vizual live)
+    // REALTIME REZERVΓöÇ├⌐RI (pentru update vizual live)
     // ----------------------------------------
     db.channel('rezervari_live')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rezervari' }, payload => {
@@ -719,7 +721,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         .subscribe();
 
     // ==========================================
-    // LOGIC─é CHAT CLIENT
+    // LOGICΓöÇ├⌐ CHAT CLIENT
     // ==========================================
     let chatClientRealtime = null;
     let chatClientMesajeToate = [];
@@ -747,16 +749,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (chatClientRealtime) db.removeChannel(chatClientRealtime);
         if (!loggedInUser) return;
         
-        // Preluare ini╚¢ial─â pentru bulin─â
-        await incarcaMesajeClient(false); // Nu rand─âm interfa╚¢a, doar actualiz─âm datele interne ╚Öi bulina
+        // Preluare inițială pentru bulină
+        await incarcaMesajeClient(false); // Nu randăm interfața, doar actualizăm datele interne și bulina
         
         chatClientRealtime = db.channel('mesaje_chat_client')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'mesaje_chat', filter: `email_client=eq.${loggedInUser.email}` }, payload => {
-                // Dac─â suntem cu modalul deschis, re-rand─âm complet
+                // Dacă suntem cu modalul deschis, re-randăm complet
                 if (modalChatClient && modalChatClient.style.display === 'flex') {
                     incarcaMesajeClient();
                 } else {
-                    // Dac─â e ├«nchis, trebuie s─â ob╚¢inem doar mesajul nou ╚Öi s─â vedem dac─â aprindem bulina
+                    // Dacă e închis, trebuie să obținem doar mesajul nou și să vedem dacă aprindem bulina
                     if (payload.new && payload.new.expeditor === 'admin' && payload.new.citit === false) {
                         const bulina = document.getElementById('bulina-chat-client');
                         if (bulina) {
@@ -780,7 +782,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (error) { console.error("Eroare chat: ", error); return; }
         chatClientMesajeToate = data || [];
         
-        // Calculeaz─â c├óte mesaje necitite sunt (trimise de admin)
+        // Calculează câte mesaje necitite sunt (trimise de admin)
         const nrNecitite = chatClientMesajeToate.filter(m => m.expeditor === 'admin' && m.citit === false).length;
         const bulina = document.getElementById('bulina-chat-client');
         if (bulina) {
@@ -795,17 +797,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const listaSide = document.getElementById('chat-client-lista-terenuri');
         if (!listaSide) return;
         
-        // Ob╚¢inem lista de terenuri unice din mesajele anterioare
+        // Obținem lista de terenuri unice din mesajele anterioare
         const terenuriCuMesaje = [...new Set(chatClientMesajeToate.map(m => m.teren))];
         
-        // Ob╚¢inem terenurile unde clientul are rezervare (pentru a-i permite s─â deschid─â chat nou ╚Öi acolo)
+        // Obținem terenurile unde clientul are rezervare (pentru a-i permite să deschidă chat nou și acolo)
         const { data: rezervari } = await db.from('rezervari').select('teren').eq('email_client', loggedInUser.email);
         const terenuriRezervate = rezervari ? [...new Set(rezervari.map(r => r.teren))] : [];
         
         const toateTerenurileClient = [...new Set([...terenuriCuMesaje, ...terenuriRezervate])];
 
         if (toateTerenurileClient.length === 0) {
-            listaSide.innerHTML = '<p style="color: #ccc; font-size: 13px; text-align: center;">Nu ai interac╚¢iuni sau rezerv─âri.</p>';
+            listaSide.innerHTML = '<p style="color: #ccc; font-size: 13px; text-align: center;">Nu ai interacțiuni sau rezervări.</p>';
             return;
         }
 
@@ -813,7 +815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         for (const teren of toateTerenurileClient) {
             const mesajeTeren = chatClientMesajeToate.filter(m => m.teren === teren);
-            const ultimulMesaj = mesajeTeren.length > 0 ? mesajeTeren[mesajeTeren.length - 1].mesaj : 'F─âr─â mesaje ├«nc─â.';
+            const ultimulMesaj = mesajeTeren.length > 0 ? mesajeTeren[mesajeTeren.length - 1].mesaj : 'Fără mesaje încă.';
             const areNecitite = mesajeTeren.some(m => m.expeditor === 'admin' && m.citit === false);
             
             const card = document.createElement('div');
@@ -821,7 +823,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (chatClientTerenCurent === teren) card.style.borderColor = 'white'; // Selectat
             
             card.innerHTML = `
-                <h4>≡ƒÅƒ∩╕Å ${teren}</h4>
+                <h4>🏟️ ${teren}</h4>
                 <p>${ultimulMesaj}</p>
             `;
             
@@ -834,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             listaSide.appendChild(card);
         }
         
-        // Dac─â aveam deja unul selectat, ├«i re-rand─âm mesajele (├«n caz c─â a venit un mesaj nou)
+        // Dacă aveam deja unul selectat, îi re-randăm mesajele (în caz că a venit un mesaj nou)
         if (chatClientTerenCurent) {
             deschideConversatiaClient(chatClientTerenCurent);
         }
@@ -842,7 +844,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function deschideConversatiaClient(teren) {
         document.getElementById('chat-client-teren-titlu').style.display = 'block';
-        document.getElementById('chat-client-teren-titlu').innerText = `Conversa╚¢ie cu Admin (${teren})`;
+        document.getElementById('chat-client-teren-titlu').innerText = `Conversație cu Admin (${teren})`;
         
         const modalBox = document.querySelector('#modal-chat-client .modal-chat-box');
         if (modalBox) modalBox.classList.add('conversatie-activa');
@@ -861,7 +863,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (m.expeditor === 'client') {
                 bula.className = 'mesaj-bula mesaj-trimis';
                 let culoareBife = m.citit ? 'bife-albastre' : 'bife-gri';
-                bula.innerHTML = `${m.mesaj} <span class="mesaj-timestamp">${dataOraFormata} <span class="bife-citit ${culoareBife}">Γ£ôΓ£ô</span></span>`;
+                bula.innerHTML = `${m.mesaj} <span class="mesaj-timestamp">${dataOraFormata} <span class="bife-citit ${culoareBife}">✓✓</span></span>`;
             } else {
                 bula.className = 'mesaj-bula mesaj-primit';
                 bula.innerHTML = `${m.mesaj} <span class="mesaj-timestamp">${dataOraFormata}</span>`;
@@ -871,19 +873,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (mesajeTeren.length === 0) {
-            container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;">Scrie un mesaj pentru a ├«ncepe conversa╚¢ia.</p>';
+            container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;">Scrie un mesaj pentru a începe conversația.</p>';
         }
 
-        // Deruleaz─â jos
+        // Derulează jos
         container.scrollTop = container.scrollHeight;
 
-        // Dac─â sunt mesaje necitite de la admin, le marc─âm ca citite
+        // Dacă sunt mesaje necitite de la admin, le marcăm ca citite
         if (idUriDeMarcat.length > 0) {
             await db.from('mesaje_chat').update({ citit: true }).in('id', idUriDeMarcat);
-            // Bulina se va actualiza via Realtime sau la urm─âtorul refresh
+            // Bulina se va actualiza via Realtime sau la următorul refresh
         }
 
-        // Verificare dac─â are voie s─â scrie (rezervare activ─â)
+        // Verificare dacă are voie să scrie (rezervare activă)
         const acum = new Date();
         const { data: rezervariActive } = await db.from('rezervari')
             .select('*')
@@ -921,7 +923,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         inputChatClient.disabled = true;
         btnTrimiteChatClient.disabled = true;
 
-        // VERIFICARE STRICT─é ├ÄNAINTE DE TRIMITE: Mai are dreptul?
+        // VERIFICARE STRICTΓöÇ├⌐ ÎNAINTE DE TRIMITE: Mai are dreptul?
         const { data: verif } = await db.from('rezervari')
             .select('*').eq('email_client', loggedInUser.email).eq('teren', chatClientTerenCurent).eq('stare', 'activa');
         let incaAreBuna = false;
@@ -971,18 +973,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         document.getElementById('chat-client-teren-titlu').style.display = 'none';
         const container = document.getElementById('chat-client-mesaje');
-        container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;" data-i18n="chat_selecteaza_stanga">Selecteaz─â un teren din st├ónga pentru a vedea mesajele.</p>';
+        container.innerHTML = '<p style="color: #ccc; text-align: center; margin-top: auto; margin-bottom: auto;" data-i18n="chat_selecteaza_stanga">Selectează un teren din stânga pentru a vedea mesajele.</p>';
         if (inputChatClient) inputChatClient.disabled = true;
         if (btnTrimiteChatClient) btnTrimiteChatClient.disabled = true;
         if (avertismentChatClient) avertismentChatClient.style.display = 'none';
     });
 
-    // Pornim Realtime la start dac─â e logat
+    // Pornim Realtime la start dacă e logat
     if (loggedInUser) {
         initializareRealtimeChatClient();
     }
 
-    // Mai trebuie s─â prindem momentul c├ónd se logheaz─â ╚Öi s─â ini╚¢ializ─âm
+    // Mai trebuie să prindem momentul când se loghează și să inițializăm
     const originalLoginBtn = document.getElementById('btn-executa-login');
     if (originalLoginBtn) {
         originalLoginBtn.addEventListener('click', () => {
