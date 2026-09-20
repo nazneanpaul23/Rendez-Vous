@@ -306,93 +306,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- INTERCEPTARE LINK RESETARE PAROLĂ NOUĂ ---
-    // Când clientul dă click pe link-ul din email, Supabase îl aduce pe site cu parametrii în URL
-    window.addEventListener('load', () => {
-        const hash = window.location.hash;
-        if (hash && hash.includes('type=recovery')) {
-            // Pe telefoane (Safari/Chrome), prompt-urile automate sunt blocate.
-            // Creăm un ecran HTML vizual de resetare.
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
-            overlay.innerHTML = `
-                <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
-                    <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
-                    <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
-                    <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
-                    <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
-                </div>
-            `;
-            document.body.appendChild(overlay);
+       // --- INTERCEPTARE LINK RESETARE PAROLĂ NOUĂ ---
+    if (window.location.href.includes('reset=true') || window.location.href.includes('type=recovery')) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
+        overlay.innerHTML = `
+            <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
+                <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
+                <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
+                <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
+                <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
 
-            document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
-                const noua = document.getElementById('input-noua-parola').value;
-                if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
-                
-                const btn = document.getElementById('btn-salveaza-parola');
-                btn.innerText = "⏳ Se salvează...";
-                btn.disabled = true;
-                
-                const { error } = await db.auth.updateUser({ password: noua });
-                if (error) {
-                    alert("❌ Eroare: " + error.message);
-                    btn.innerText = "Salvează Noua Parolă";
-                    btn.disabled = false;
-                } else {
-                    alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
-                    document.body.removeChild(overlay);
-                    window.location.hash = ''; // curățăm link-ul
-                    document.getElementById('modal-auth').style.display = 'flex';
-                }
-            });
-        }
-    });
-
-    document.getElementById('btn-executa-register')?.addEventListener('click', async () => {
-        const nume = document.getElementById('reg-nume').value.trim();
-        const email = document.getElementById('reg-email').value.trim(); 
-        const telefon = document.getElementById('reg-telefon').value.trim(); 
-        const parola = document.getElementById('reg-parola').value.trim();
-        
-        if(!nume || !email || !telefon || !parola) return alert("Completați toate câmpurile!");
-        if(parola.length < 6) return alert("Parola trebuie să aibă minim 6 caractere pentru securitate!");
-        
-        const btn = document.getElementById('btn-executa-register');
-        btn.innerText = "⏳..."; btn.disabled = true;
-
-        const { data: verificareTel } = await db.from('clienti').select('telefon').eq('telefon', telefon);
-        if (verificareTel && verificareTel.length > 0) {
-            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
-            return alert("Acest număr de telefon este deja folosit pentru alt cont! Nu poți crea mai multe conturi pe același număr.");
-        }
-
-        // 1. Înregistrare în seiful Supabase Auth (Securitate)
-        const { data: authData, error: authError } = await db.auth.signUp({
-            email: email,
-            password: parola,
-        });
-
-        if (authError) {
-            btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
-            if (authError.message.includes("already registered")) {
-                return alert("Există deja un cont cu această adresă de email! Te rugăm să te conectezi pe el.");
+        document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
+            const noua = document.getElementById('input-noua-parola').value;
+            if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+            
+            const btn = document.getElementById('btn-salveaza-parola');
+            btn.innerText = "⏳ Se salvează...";
+            btn.disabled = true;
+            
+            const { error } = await db.auth.updateUser({ password: noua });
+            if (error) {
+                alert("❌ Eroare: " + error.message);
+                btn.innerText = "Salvează Noua Parolă";
+                btn.disabled = false;
+            } else {
+                alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
+                document.body.removeChild(overlay);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                document.getElementById('modal-auth').style.display = 'flex';
             }
-            return alert("Eroare la securizarea contului: " + authError.message);
-        }
-
-        // 2. Înregistrare în tabelul vechi (pentru a funcționa Make.com, Rezervările și Chat-ul)
-        // Nu mai salvăm parola în text clar, pentru securitate! O punem "***" ca să știm că e în seif.
-        const { error: insertError } = await db.from('clienti').insert([{ nume, email, telefon }]);
-        
-        btn.innerText = window.dict[window.lang]['btn_creare_cont']; btn.disabled = false;
-        
-        if (!insertError) {
-            alert("Cont creat și securizat cu succes! Te poți autentifica acum.");
-            document.getElementById('tab-login').click();
-        } else {
-            alert("Contul a fost securizat, dar a apărut o eroare la profil: " + insertError.message);
-        }
-    });
+        });
+    }
 
     // --- ISTORIC REZERVĂRI ---
     window.reincarcaIstoricCurent = function() {
