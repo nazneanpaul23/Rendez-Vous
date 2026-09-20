@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
                 document.body.removeChild(overlay);
-                window.location.hash = ''; 
+                window.history.replaceState({}, document.title, window.location.pathname);
                 document.getElementById('modal-auth').style.display = 'flex';
             }
         });
