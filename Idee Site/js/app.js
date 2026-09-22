@@ -1067,4 +1067,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+        // --- RESETARE PAROLĂ (TRIMITERE EMAIL) ---
+    document.getElementById('btn-forgot-password')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = prompt("Te rugăm să introduci adresa de email pentru care dorești resetarea parolei:");
+        if (!email) return;
+
+        const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
+            redirectTo: window.location.origin + window.location.pathname,
+        });
+
+        if (error) {
+            alert("Eroare la trimiterea emailului de resetare: " + error.message);
+        } else {
+            alert("Ți-am trimis un link de resetare a parolei pe email! Verifică și folderul Spam.");
+        }
+    });
+
 });
