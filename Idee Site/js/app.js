@@ -200,13 +200,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- ESC PENTRU A ÎNCHIDE ORICE MODAL ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari', 'modal-chat-client'];
+            const modals = ['modal-auth', 'modal-profil', 'modal-terenuri', 'modal-rezervare', 'modal-lista-rezervari', 'modal-chat-client', 'modal-parola-noua'];
             modals.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && el.style.display !== 'none') el.style.display = 'none';
             });
         }
     });
+
+    // TASK 2: Închidere universală pentru orice buton X dintr-un modal
+    document.querySelectorAll('.buton-inchidere').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modalParent = this.closest('.modal');
+            if (modalParent) {
+                modalParent.style.display = 'none';
+            }
+        });
+    });
+
+    // Language buttons binding
+    document.getElementById('btn-lang-ro')?.addEventListener('click', () => window.schimbaLimba('ro'));
+    document.getElementById('btn-lang-hu')?.addEventListener('click', () => window.schimbaLimba('hu'));
+    document.getElementById('btn-lang-en')?.addEventListener('click', () => window.schimbaLimba('en'));
 
     // --- PREVENIRE SCROLL FUNDAL (MUTATION OBSERVER PENTRU MODALE) ---
     const observerModale = new MutationObserver((mutations) => {
@@ -290,61 +305,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- RESETARE PAROLĂ (SUPABASE NATIV) ---
-    document.getElementById('btn-forgot-password')?.addEventListener('click', async (e) => {
+    document.getElementById('btn-am-uitat-parola')?.addEventListener('click', async (e) => {
         e.preventDefault();
-        const email = prompt("Te rugăm să introduci adresa de email pentru care dorești resetarea parolei:");
-        if (!email) return;
+        const email = document.getElementById('login-email').value.trim();
+        if (!email) return alert("Te rugăm să introduci adresa de email în câmpul de login pentru a reseta parola.");
 
-        const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
+        const btn = document.getElementById('btn-am-uitat-parola');
+        const textInitial = btn.innerText;
+        btn.innerText = "⏳..."; btn.disabled = true;
+
+        const { error } = await db.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + window.location.pathname,
         });
 
+        btn.innerText = textInitial; btn.disabled = false;
+
         if (error) {
+            console.error("Eroare resetare parola:", error);
             alert("Eroare la trimiterea emailului de resetare: " + error.message);
         } else {
-            alert("Ți-am trimis un link de resetare a parolei pe email! Verifică și folderul Spam.");
+            alert("Email trimis! Ți-am trimis un link de resetare a parolei pe email. Verifică și folderul Spam.");
         }
     });
 
     // --- INTERCEPTARE LINK RESETARE PAROLĂ NOUĂ ---
-    // Când clientul dă click pe link-ul din email, Supabase îl aduce pe site cu parametrii în URL
     window.addEventListener('load', () => {
         const hash = window.location.hash;
         if (hash && hash.includes('type=recovery')) {
-            // Pe telefoane (Safari/Chrome), prompt-urile automate sunt blocate.
-            // Creăm un ecran HTML vizual de resetare.
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
-            overlay.innerHTML = `
-                <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
-                    <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
-                    <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
-                    <input type="password" id="input-noua-parola" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
-                    <button id="btn-salveaza-parola" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
-                </div>
-            `;
-            document.body.appendChild(overlay);
+            const modalNou = document.getElementById('modal-parola-noua');
+            if (modalNou) {
+                modalNou.style.display = 'flex';
+            }
+        }
+    });
 
-            document.getElementById('btn-salveaza-parola').addEventListener('click', async () => {
-                const noua = document.getElementById('input-noua-parola').value;
-                if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
-                
-                const btn = document.getElementById('btn-salveaza-parola');
-                btn.innerText = "⏳ Se salvează...";
-                btn.disabled = true;
-                
-                const { error } = await db.auth.updateUser({ password: noua });
-                if (error) {
-                    alert("❌ Eroare: " + error.message);
-                    btn.innerText = "Salvează Noua Parolă";
-                    btn.disabled = false;
-                } else {
-                    alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
-                    document.body.removeChild(overlay);
-                    window.location.hash = ''; // curățăm link-ul
-                    document.getElementById('modal-auth').style.display = 'flex';
-                }
-            });
+    document.getElementById('btn-salveaza-parola-noua')?.addEventListener('click', async () => {
+        const noua = document.getElementById('input-noua-parola').value;
+        if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+        
+        const btn = document.getElementById('btn-salveaza-parola-noua');
+        const textInitial = btn.innerText;
+        btn.innerText = "⏳ Se salvează...";
+        btn.disabled = true;
+        
+        const { error } = await db.auth.updateUser({ password: noua });
+        
+        btn.innerText = textInitial;
+        btn.disabled = false;
+
+        if (error) {
+            console.error("Eroare salvare parola noua:", error);
+            alert("❌ Eroare: " + error.message);
+        } else {
+            alert("✅ Parola a fost schimbată cu succes! Te poți loga pe site cu ea.");
+            document.getElementById('modal-parola-noua').style.display = 'none';
+            window.location.hash = ''; // curățăm link-ul
+            document.getElementById('modal-auth').style.display = 'flex';
         }
     });
 
@@ -700,8 +716,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const butonConfirma = document.getElementById('buton-confirma');
-        butonConfirma.disabled = true;
-
+        
         const { data: dublura } = await db.from('rezervari').select('ora').eq('teren', terenCurent).eq('data_str', dataSelectataStr).neq('stare', 'anulata').in('ora', oraSelectata);
         if (dublura && dublura.length > 0) {
             butonConfirma.disabled = false; incarcaOreDinSupabase(); return;
@@ -731,16 +746,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         });
         
+        const textButonInitial = butonConfirma.innerText;
+        butonConfirma.innerText = "Se procesează...";
+        butonConfirma.disabled = true;
+
         const { error } = await db.from('rezervari').insert(rowsToInsert);
         
         let erori = error ? 1 : 0;
         if (error && error.code === '23505') {
+            console.error("Eroare rezervare - dublura:", error);
             alert("Atenție: Una sau mai multe ore selectate tocmai au fost rezervate de altcineva. Vă rugăm să reîncărcați și să alegeți altă oră.");
         } else if (error) {
+            console.error("Eroare salvare rezervare:", error);
             alert("Eroare la salvarea rezervării: " + error.message);
         }
 
-        if (erori === 0) { document.getElementById('modal-rezervare').style.display = 'none'; } 
+        if (erori === 0) { 
+            document.getElementById('modal-rezervare').style.display = 'none'; 
+        } 
+        
+        butonConfirma.innerText = textButonInitial;
         butonConfirma.disabled = false;
     });
 
