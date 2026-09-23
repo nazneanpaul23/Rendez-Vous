@@ -1,4 +1,55 @@
 // ==========================================
+// DETECTARE LINK RESETARE PAROLĂ (PUS EXPRES LA ÎNCEPUT PENTRU A NU RATA EVENIMENTUL)
+// ==========================================
+db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        
+        const afiseazaModalParola = () => {
+            // Creăm o fereastră neagră pe tot ecranul
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
+            overlay.innerHTML = `
+                <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
+                    <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
+                    <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
+                    <input type="password" id="input-noua-parola-js" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
+                    <button id="btn-salveaza-parola-js" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('btn-salveaza-parola-js').addEventListener('click', async () => {
+                const noua = document.getElementById('input-noua-parola-js').value;
+                if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
+                
+                const btn = document.getElementById('btn-salveaza-parola-js');
+                btn.innerText = "⏳ Se salvează...";
+                btn.disabled = true;
+                
+                const { error } = await db.auth.updateUser({ password: noua });
+                
+                if (error) {
+                    alert("❌ Eroare: " + error.message);
+                    btn.innerText = "Salvează Noua Parolă";
+                    btn.disabled = false;
+                } else {
+                    alert("✅ Parola a fost schimbată cu succes! Te poți loga acum.");
+                    document.body.removeChild(overlay);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+        };
+
+        // Asigură-te că pagina s-a încărcat înainte să adaugi fereastra
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', afiseazaModalParola);
+        } else {
+            afiseazaModalParola();
+        }
+    }
+});
+
+// ==========================================
 // 0. SISTEMUL DE TRADUCERI (i18n) GLOBAL
 // ==========================================
 window.dict = {
@@ -738,15 +789,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // LOGICĂ CHAT CLIENT
     // ==========================================
-    let chatClientRealtime = null;
-    let chatClientMesajeToate = [];
-    let chatClientTerenCurent = null;
-    
-    const btnVeziChat = document.getElementById('btn-vezi-chat');
     const modalChatClient = document.getElementById('modal-chat-client');
+    const btnVeziChat = document.getElementById('btn-vezi-chat');
     const btnInchideChatClient = document.getElementById('inchide-chat-client');
-    const inputChatClient = document.getElementById('chat-client-input');
-    const btnTrimiteChatClient = document.getElementById('chat-client-btn-trimite');
+    const inputChatClient = document.getElementById('input-chat-client');
+    const btnTrimiteChatClient = document.getElementById('btn-trimite-chat-client');
+    
+    let chatClientRealtime = null;
+    let chatClientTerenCurent = null; // Stochează terenul selectat curent pentru conversație
+    let chatClientMesajeToate = []; // Toate mesajele clientului
     const avertismentChatClient = document.getElementById('chat-client-avertisment');
 
     btnVeziChat?.addEventListener('click', () => {
@@ -1019,20 +1070,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Încearcă să ia emailul din câmpul de login. Dacă e gol, cere prin prompt.
             let email = document.getElementById('login-email')?.value.trim();
             if (!email) {
-                email = prompt("Introdu adresa ta de email pentru a primi linkul de resetare:");
+                alert("Te rugăm să introduci adresa de email în căsuța de mai sus, apoi apasă din nou pe Resetare.");
+                return;
             }
-            if (!email) return;
 
             const textInitial = nouBtnUitat.innerText;
             nouBtnUitat.innerText = "⏳..."; 
-            nouBtnUitat.disabled = true;
+            nouBtnUitat.style.pointerEvents = "none";
 
             const { error } = await db.auth.resetPasswordForEmail(email.trim(), {
                 redirectTo: window.location.origin + window.location.pathname,
             });
 
             nouBtnUitat.innerText = textInitial; 
-            nouBtnUitat.disabled = false;
+            nouBtnUitat.style.pointerEvents = "auto";
 
             if (error) {
                 alert("Eroare la trimitere: " + error.message);
@@ -1041,46 +1092,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-    // --- 2. AFIȘARE FEREASTRĂ PAROLĂ NOUĂ (Când te întorci din email) ---
-    // Această funcție detectează automat când intri dintr-un link de resetare Supabase
-    db.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-            
-            // Creăm o fereastră neagră pe tot ecranul (peste tot site-ul)
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);z-index:999999;display:flex;justify-content:center;align-items:center;';
-            overlay.innerHTML = `
-                <div style="background:#1e1e1e;padding:30px;border-radius:15px;text-align:center;border:2px solid #3b82f6;width:90%;max-width:400px;font-family:sans-serif;">
-                    <h2 style="color:white;margin-bottom:15px;font-size:22px;">🔐 Resetează Parola</h2>
-                    <p style="color:#ccc;font-size:14px;margin-bottom:20px;">Introdu noua parolă mai jos (minim 6 caractere).</p>
-                    <input type="password" id="input-noua-parola-js" placeholder="Noua parolă..." style="padding:15px;width:100%;box-sizing:border-box;border-radius:8px;border:none;margin-bottom:20px;font-size:16px;">
-                    <button id="btn-salveaza-parola-js" style="padding:15px 24px;width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;">Salvează Noua Parolă</button>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-
-            document.getElementById('btn-salveaza-parola-js').addEventListener('click', async () => {
-                const noua = document.getElementById('input-noua-parola-js').value;
-                if(noua.length < 6) return alert("Parola trebuie să aibă minim 6 caractere!");
-                
-                const btn = document.getElementById('btn-salveaza-parola-js');
-                btn.innerText = "⏳ Se salvează...";
-                btn.disabled = true;
-                
-                const { error } = await db.auth.updateUser({ password: noua });
-                
-                if (error) {
-                    alert("❌ Eroare: " + error.message);
-                    btn.innerText = "Salvează Noua Parolă";
-                    btn.disabled = false;
-                } else {
-                    alert("✅ Parola a fost schimbată cu succes! Te poți loga acum.");
-                    document.body.removeChild(overlay);
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
-            });
-        }
-    });
 
 });
