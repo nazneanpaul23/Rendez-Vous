@@ -1,24 +1,318 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    let contLogatGlobal = null;
-    let terenuriPtTabel = []; // Terenurile pe care are voie sa le vada in tabel/chat
+let contLogatGlobal = null; 
+window.lang = 'ro';
+localStorage.setItem('lang', 'ro');
 
-    // Verificăm dacă există deja sesiune salvată
-    const savedSess = localStorage.getItem('admin_session');
-    if (savedSess) {
-        contLogatGlobal = JSON.parse(savedSess);
-        document.getElementById('form-login-admin').style.display = 'none';
-        document.getElementById('container-admin-app').style.display = 'block';
-        document.getElementById('admin-nume-sus').innerText = "Logat ca: " + contLogatGlobal.nume_admin;
-        aplicaPermisiuni(contLogatGlobal);
-        setTimeout(() => initializareRealtimeChatAdmin(), 1000);
+// --- TRADUCERI ADMIN ---
+window.setLangAdmin = function(limba) {
+    limba = 'ro'; // Force Romanian
+    localStorage.setItem('lang', limba);
+    window.lang = limba;
+
+    const dict = {
+        'ro': {
+            't-logare': '🔐 Logare Panou Control',
+            't-logout': 'Deconectare',
+            't-rez-man-scurt': 'Rezervare Manuală',
+            't-prog-scurt': 'Program & Active',
+            't-istoric-titlu-scurt': 'Toate Rezervările',
+            't-rez-man': '📝 Adaugă Rezervare Manuală',
+            't-rez-desc': '(Dacă e ocupată, sistemul blochează)',
+            't-pt-ce-teren': 'Pentru ce teren?',
+            't-nume': 'Nume Client (sau Telefon)',
+            't-data-cal': 'Data calendaristică',
+            't-ora': 'Ora',
+            't-pret-incasat': 'Preț Încasat',
+            't-btn-salv': '➕ Salvează',
+            't-istoric-titlu': '📅 Lista Detaliată a Rezervărilor',
+            't-istoric-btn': '🔄 Descarcă Rezervările',
+            't-prog': '📋 Program & Disponibilitate',
+            't-alege': 'Alege Terenul',
+            't-data': 'Data Dorită',
+            't-ora-th': 'Ora',
+            't-status': 'Status',
+            't-detalii': 'Client / Detalii',
+            't-reincarca': '🔄 Reîncarcă Programul',
+            't-inchis-admin': '⛔ Închis de Admin'
+        },
+        'hu': {
+            't-logare': '🔐 Vezérlőpult Bejelentkezés',
+            't-logout': 'Kijelentkezés',
+            't-rez-man-scurt': 'Kézi Foglalás',
+            't-prog-scurt': 'Program és Aktív',
+            't-istoric-titlu-scurt': 'Összes Foglalás',
+            't-rez-man': '📝 Kézi Foglalás Hozzáadása',
+            't-rez-desc': '(Ha foglalt, a rendszer blokkolja)',
+            't-pt-ce-teren': 'Melyik pályára?',
+            't-nume': 'Ügyfél neve (vagy Telefon)',
+            't-data-cal': 'Naptári dátum',
+            't-ora': 'Óra',
+            't-pret-incasat': 'Beszedett Ár',
+            't-btn-salv': '➕ Mentés',
+            't-istoric-titlu': '📅 Foglalások Részletes Listája',
+            't-istoric-btn': '🔄 Foglalások Letöltése',
+            't-prog': '📋 Program és Elérhetőség',
+            't-alege': 'Válassz Pályát',
+            't-data': 'Kívánt Dátum',
+            't-ora-th': 'Óra',
+            't-status': 'Állapot',
+            't-detalii': 'Ügyfél / Részletek',
+            't-reincarca': '🔄 Program Újratöltése',
+            't-inchis-admin': '⛔ Admin által Zárva'
+        }
+    };
+
+    const currentDict = dict[limba] || dict['ro'];
+    document.querySelectorAll('[data-trad]').forEach(el => {
+        const key = el.getAttribute('data-trad');
+        if (currentDict[key]) el.innerText = currentDict[key];
+    });
+
+    if(typeof window.incarcaTabelProgram === 'function') window.incarcaTabelProgram();
+    if(typeof window.reincarcaIstoricAdmin === 'function') window.reincarcaIstoricAdmin();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.setLangAdmin(window.lang);
+});
+
+// --- FUNCTII GLOBALE ---
+window.comprimaImagine = function(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = event => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; 
+                let width = img.width;
+                let height = img.height;
+                if (width > MAX_WIDTH) {
+                    height = Math.round((height * MAX_WIDTH) / width);
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                resolve(base64);
+            };
+        };
+        reader.onerror = error => reject(error);
+    });
+};
+
+window.initializeazaTabel = function(terenuriArray) {
+    const select = document.getElementById('tabel-teren');
+    select.innerHTML = '';
+    
+    if (terenuriArray.length === 0) {
+        select.innerHTML = '<option value="">Niciun teren alocat</option>';
+        return;
+    }
+    
+    terenuriArray.forEach(t => {
+        select.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+    
+    const dataInput = document.getElementById('tabel-data');
+    if (!dataInput.value) {
+        dataInput.value = new Date().toISOString().split('T')[0];
+    }
+    
+    dataInput.addEventListener('change', window.incarcaTabelProgram);
+    select.addEventListener('change', window.incarcaTabelProgram);
+    window.incarcaTabelProgram();
+};
+
+window.incarcaTabelProgram = async function() {
+    const terenAles = document.getElementById('tabel-teren').value;
+    const dataInput = document.getElementById('tabel-data').value;
+    const tbody = document.getElementById('tabel-corp-program');
+    
+    if (!terenAles || !dataInput) return;
+    tbody.innerHTML = '<tr><td colspan="3" style="padding:15px; text-align:center;">Se încarcă datele... ⏳</td></tr>';
+
+    const d = new Date(dataInput);
+    const zile = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+    const dataFormata = `${zile[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    const { data: rezervari, error } = await db.from('rezervari')
+        .select('*')
+        .eq('teren', terenAles)
+        .eq('data_str', dataFormata)
+        .neq('stare', 'anulata');
+
+    let clientiAsociati = [];
+    if (rezervari && rezervari.length > 0) {
+        const emails = rezervari.map(r => r.email_client).filter(e => e !== 'Teren Blocat');
+        if(emails.length > 0) {
+            const { data: clientiDB } = await db.from('clienti').select('*').in('email', emails);
+            if (clientiDB) clientiAsociati = clientiDB;
+        }
     }
 
-    document.getElementById('btn-deconectare-admin')?.addEventListener('click', () => {
+    const { data: infoTeren } = await db.from('terenuri').select('are_chat').eq('nume', terenAles).single();
+    const terenAreChatActivat = infoTeren ? infoTeren.are_chat !== false : true;
+
+    let html = '';
+    const ore = ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+
+    const txtLiber = window.lang === 'hu' ? 'SZABAD' : 'LIBER';
+    const txtOcupat = window.lang === 'hu' ? 'FOGLALT' : 'OCUPAT';
+    const txtBlocat = window.lang === 'hu' ? 'ZÁRVA' : 'BLOCAT';
+    const txtDetaliiBlocat = window.lang === 'hu' ? '⛔ Admin által Zárva' : '⛔ Închis de Admin';
+
+    ore.forEach(ora => {
+        const rGasita = rezervari ? rezervari.find(r => r.ora === ora) : null;
+        let badge = `<span style="background: #22c55e; color: black; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${txtLiber}</span>`;
+        let detalii = '<span style="color:#888;">-</span>';
+        let bg = 'transparent';
+
+        if (rGasita) {
+            if (rGasita.email_client === 'Teren Blocat') {
+                badge = `<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${txtBlocat}</span>`;
+                detalii = txtDetaliiBlocat;
+                bg = 'rgba(239, 68, 68, 0.1)';
+            } else {
+                let infoClient = rGasita.email_client;
+                let contClient = clientiAsociati.find(c => c.email === rGasita.email_client);
+                
+                if (contClient) {
+                    let cNume = contClient.nume ? `👤 Nume: ${contClient.nume}<br>` : '';
+                    let cTel = contClient.telefon ? `📞 Tel: ${contClient.telefon}<br>` : '';
+                    let cMail = `✉️ Email: ${contClient.email}`;
+                    infoClient = `${cNume}${cTel}${cMail}`;
+                } else {
+                    infoClient = `👤 Detalii (Manual): ${rGasita.email_client}`;
+                }
+
+                let chatBtnStr = "";
+                if (terenAreChatActivat) {
+                    if (contClient) {
+                        const clientName = contClient.nume || contClient.email.split('@')[0];
+                        chatBtnStr = `<button class="btn-tabel-chat" onclick="deschideChatDinTabel('${contClient.email}', '${terenAles}', '${clientName}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #3b82f6; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 10px; transition: 0.3s; vertical-align: middle;">💬 Chat</button>`;
+                    } else {
+                        chatBtnStr = `<button class="btn-tabel-chat" onclick="deschideChatDinTabel('${rGasita.email_client}', '${terenAles}', '${rGasita.email_client.split('@')[0]}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #3b82f6; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 10px; transition: 0.3s; vertical-align: middle;">💬 Chat</button>`;
+                    }
+                }
+
+                badge = `<span style="background: #f59e0b; color: black; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${txtOcupat}</span>`;
+                detalii = `<span style="color:white; font-size:13px; line-height:1.4;">${infoClient}</span> <br><div style="margin-top: 5px; display: flex; align-items: center;"><span style="font-size:12px; color:#aaa;">💰 ${rGasita.pret_total}</span>${chatBtnStr}</div>`;
+                bg = 'rgba(245, 158, 11, 0.05)';
+            }
+        }
+        html += `<tr style="background: ${bg}; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 12px; border-right: 1px solid rgba(255,255,255,0.05); font-weight: bold; color: #fff;">${ora}</td>
+                <td style="padding: 12px; border-right: 1px solid rgba(255,255,255,0.05);">${badge}</td>
+                <td style="padding: 12px;">${detalii}</td></tr>`;
+    });
+    tbody.innerHTML = html;
+};
+
+window.actualizeazaBifeTerenuri = async function() {
+    const container = document.getElementById('container-checkbox-terenuri');
+    if (!container) return;
+    container.innerHTML = `
+        <label><input type="checkbox" id="check-super-admin" value="ALL" style="margin-right: 5px;"> 👑 SUPER ADMIN (Acces Total)</label>
+        <hr style="border-color: rgba(255,255,255,0.1); width: 100%; margin: 5px 0;">
+    `;
+    const { data } = await db.from('terenuri').select('nume, sport');
+    if (data) {
+        data.forEach(t => { container.innerHTML += `<label><input type="checkbox" class="check-teren-alocat" value="${t.nume}" style="margin-right: 5px;"> ${t.nume} (${t.sport})</label>`; });
+    }
+};
+
+window.incarcaTerenuriAdmin = async function() {
+    const container = document.getElementById('container-lista-terenuri');
+    if (!container) return;
+    container.innerHTML = "<p style='color: white;'>Se descarcă terenurile din cloud...</p>";
+    
+    const { data } = await db.from('terenuri').select('*');
+    if (!data || data.length === 0) { container.innerHTML = "<p style='color: #ccc;'>Niciun teren adăugat.</p>"; return; }
+    
+    let html = "";
+    data.forEach(t => {
+        let textMinge = t.optiune_minge ? `Da (${t.pret_minge || 15} Lei)` : 'Nu';
+        html += `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <img src="${t.poza || 'assets/imagini/default.png'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #f59e0b;">${t.sport} - ${t.nume}</h4>
+                        <p style="margin: 0; font-size: 13px; color: #ccc;">Preț: ${t.pret} Lei/oră | Minge: ${textMinge}</p>
+                    </div>
+                </div>
+                <button onclick="stergeTerenAdmin(${t.id})" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer;">❌ Șterge</button>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+};
+
+window.stergeTerenAdmin = async function(id) {
+    if (confirm("Ești sigur? Acest teren va dispărea definitiv de pe site!")) {
+        await db.from('terenuri').delete().eq('id', id);
+        window.incarcaTerenuriAdmin();
+        window.actualizeazaBifeTerenuri();
+    }
+};
+
+window.anuleazaRezervareAdmin = async function(id) {
+    if (confirm("Ești sigur că vrei să anulezi rezervarea? Ea va apărea marcată cu roșu în istoric.")) {
+        const { error } = await db.from('rezervari').update({ stare: 'anulata' }).eq('id', id);
+        if (!error) {
+            if (typeof window.reincarcaIstoricAdmin === 'function') window.reincarcaIstoricAdmin();
+            if (typeof window.incarcaTabelProgram === 'function') window.incarcaTabelProgram(); 
+        }
+        else if (error) alert("Eroare la anulare: " + error.message);
+    }
+};
+
+// --- LOGICA PRINCIPALĂ A PAGINII ---
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-logout-admin')?.addEventListener('click', async () => {
         localStorage.removeItem('admin_session');
+        if(window.db && window.db.auth) { await db.auth.signOut(); }
         window.location.reload();
     });
 
-    document.getElementById('form-login-admin')?.addEventListener('keydown', (e) => {
+    // NOU: Închide modalele cu tasta ESC în Admin
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            document.querySelectorAll('.modal').forEach(m => {
+                m.style.display = 'none';
+            });
+        }
+    });
+
+    // --- PREVENIRE SCROLL FUNDAL (MUTATION OBSERVER PENTRU MODALE) ---
+    const observerModaleAdmin = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+                const anyModalOpen = Array.from(document.querySelectorAll('.modal')).some(m => m.style.display === 'flex' || m.style.display === 'block');
+                if (anyModalOpen) {
+                    document.body.classList.add('fara-scroll');
+                } else {
+                    document.body.classList.remove('fara-scroll');
+                }
+            }
+        });
+    });
+    document.querySelectorAll('.modal').forEach(m => {
+        observerModaleAdmin.observe(m, { attributes: true });
+    });
+
+    // NOU: Închide modalele când se dă click pe fundalul întunecat (în afara chenarului)
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    document.getElementById('sectiune-login')?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             document.getElementById('login-admin-btn')?.click();
@@ -26,175 +320,368 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('login-admin-btn')?.addEventListener('click', async () => {
-        const email = document.getElementById('admin-email').value.trim();
-        const parola = document.getElementById('admin-parola').value.trim();
-        if (!email || !parola) return alert("Completati ambele campuri!");
+        const email = document.getElementById('login-email-admin').value.trim();
+        const parola = document.getElementById('login-parola').value.trim();
+        if (!email || !parola) return alert("Introdu adresa de email și parola!");
 
         const btn = document.getElementById('login-admin-btn');
-        btn.innerText = "⏳..."; btn.disabled = true;
-
+        const textVechi = btn.innerText;
+        btn.innerText = "Se verifică securitatea...";
+        btn.disabled = true;
+        
+        // 1. Verificare Auth Securizată
         const { data: authData, error: authError } = await db.auth.signInWithPassword({
             email: email,
             password: parola,
         });
 
         if (authError) {
-            btn.innerText = "Loghează-te ca Admin"; btn.disabled = false;
-            return alert("Eroare autentificare (Auth): " + authError.message);
+            btn.innerText = textVechi; btn.disabled = false;
+            return alert("⛔ Acces respins! Email sau parolă greșită.");
         }
-
-        const emailLogat = authData.user.email;
-        const { data: adminProfil } = await db.from('users_admin').select('*').eq('email', emailLogat).single();
-
-        if (!adminProfil) {
-            btn.innerText = "Loghează-te ca Admin"; btn.disabled = false;
-            return alert("Ești logat, dar contul tău nu are profil de Admin (lipsă din users_admin).");
-        }
-
-        contLogatGlobal = adminProfil;
-        localStorage.setItem('admin_session', JSON.stringify(adminProfil));
-
-        document.getElementById('form-login-admin').style.display = 'none';
-        document.getElementById('container-admin-app').style.display = 'block';
-        document.getElementById('admin-nume-sus').innerText = "Logat ca: " + contLogatGlobal.nume_admin;
         
-        aplicaPermisiuni(contLogatGlobal);
-    });
+        // 2. Extragere rol din tabelul users_admin pe baza email-ului
+        const { data, error } = await db.from('users_admin').select('*').eq('email', email).single();
+        
+        if (data && !error) {
+            contLogatGlobal = data;
+            document.getElementById('sectiune-login').style.display = 'none';
+            document.getElementById('sectiune-dashboard').style.display = 'flex';
+            document.getElementById('text-rol-activ').innerText = window.lang === 'hu' ? `Bejelentkezve mint: \n${contLogatGlobal.nume_admin}` : `Logat ca: ${contLogatGlobal.nume_admin}`;
+            
+            let terenuriPtTabel = []; 
 
-    async function aplicaPermisiuni(cont) {
-        if (cont.is_super) {
-            document.querySelectorAll('.super-admin-only').forEach(el => el.style.display = 'flex');
-            document.querySelectorAll('.admin-comun').forEach(el => el.style.display = 'flex');
-            
-            window.incarcaTerenuriAdmin();
-            window.actualizeazaBifeTerenuri(); 
-            
-            const { data: toate } = await db.from('terenuri').select('nume');
-            if (toate) terenuriPtTabel = toate.map(t => t.nume);
-            
-        } else {
-            document.querySelectorAll('.super-admin-only').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.admin-comun').forEach(el => el.style.display = 'flex');
+            // NOUA LOGICĂ DE SHOW/HIDE PENTRU MENIU GRID
+            let listaTerenuriAlocate = [];
 
-            const listaTerenuriAlocate = cont.terenuri ? cont.terenuri.split(',') : []; 
-            terenuriPtTabel = listaTerenuriAlocate.filter(n => n); 
+            if (contLogatGlobal.is_super) {
+                document.querySelectorAll('.super-admin-only').forEach(el => el.style.display = 'flex');
+                document.querySelectorAll('.admin-comun').forEach(el => el.style.display = 'flex');
+                
+                window.incarcaTerenuriAdmin();
+                window.actualizeazaBifeTerenuri(); 
+                
+                const { data: toate } = await db.from('terenuri').select('nume');
+                if (toate) {
+                    terenuriPtTabel = toate.map(t => t.nume);
+                    listaTerenuriAlocate = terenuriPtTabel;
+                }
+            } else {
+                document.querySelectorAll('.super-admin-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.admin-comun').forEach(el => el.style.display = 'flex');
+
+                listaTerenuriAlocate = contLogatGlobal.terenuri ? contLogatGlobal.terenuri.split(',') : []; 
+                terenuriPtTabel = listaTerenuriAlocate.filter(n => n); 
+            }
 
             const containerMeniu = document.getElementById('container-meniu-terenuri');
-            const containerModale = document.getElementById('container-modale-terenuri');
-            const selectManualTeren = document.getElementById('manual-teren');
-            
-            if (containerMeniu) containerMeniu.innerHTML = '';
-            if (containerModale) containerModale.innerHTML = '';
-            if (selectManualTeren) selectManualTeren.innerHTML = '';
+                const containerModale = document.getElementById('container-modale-terenuri');
+                const selectManualTeren = document.getElementById('manual-teren');
+                
+                containerMeniu.innerHTML = ''; 
+                containerModale.innerHTML = '';
+                selectManualTeren.innerHTML = '';
 
-            const { data: terenuriDB } = await db.from('terenuri').select('*').in('nume', terenuriPtTabel);
+                let htmlMeniu = "";
+                let htmlModale = "";
 
-            if (terenuriDB) {
-                terenuriDB.forEach(t => {
-                    const idSafe = t.nume.replace(/\s+/g, '-').toLowerCase();
+                for (let numeT of listaTerenuriAlocate) {
+                    if(!numeT) continue;
+                    const { data: terenDB } = await db.from('terenuri').select('*').eq('nume', numeT).single();
+                    if (terenDB) {
+                        selectManualTeren.innerHTML += `<option value="${terenDB.nume}" data-sport="${terenDB.sport}">${terenDB.nume}</option>`;
+                        
+                        let culoareTeren = terenDB.este_activ !== false ? '#3b82f6' : '#ef4444';
 
-                    if (containerMeniu) {
-                        containerMeniu.innerHTML += `
-                            <button class="btn-meniu-teren" onclick="document.getElementById('modal-setari-${idSafe}').style.display='flex'">
-                                ⚽ Setări ${t.nume}
-                            </button>
+                        htmlMeniu += `
+                            <div class="card-sport admin-comun" style="padding: 20px; display: flex;" onclick="document.getElementById('modal-setari-${terenDB.id}').style.display='flex'">
+                                <h2 style="font-size: 18px;">⚙️<br><br>Setări<br>${terenDB.nume}</h2>
+                            </div>
                         `;
-                    }
 
-                    if (containerModale) {
-                        containerModale.innerHTML += `
-                            <div id="modal-setari-${idSafe}" class="modal" style="display: none;">
-                                <div class="modal-box" style="position:relative; width: 95%; max-width: 500px;">
-                                    <button class="buton-inchidere" onclick="this.closest('.modal').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">✖</button>
-                                    <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">⚙️ ${t.nume}</h3>
-                                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                        <label style="color: #ccc; font-size: 13px; display: block; margin-bottom: 5px;">Link Locație Google Maps</label>
-                                        <input type="text" id="locatie-${idSafe}" value="${t.locatie}" style="width: 100%; padding: 10px; box-sizing: border-box; background: #222; border: 1px solid #444; color: white; border-radius: 5px;">
+                        htmlModale += `
+                            <div class="modal" id="modal-setari-${terenDB.id}">
+                                <div class="modal-continut modal-mare" style="border-color: ${culoareTeren}; width: 100%; max-width: 550px;">
+                                    <button class="buton-inchidere" onclick="this.parentElement.parentElement.style.display='none'">X</button>
+                                    <div>
+                                        <h2 class="titlu-modal" style="font-size: 20px; text-align: left; color: ${culoareTeren};">⚙️ Setări (${terenDB.nume})</h2>
                                     </div>
-                                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                        <label style="color: #ccc; font-size: 13px; display: block; margin-bottom: 5px;">Preț Teren (RON/oră)</label>
-                                        <input type="number" id="pret-${idSafe}" value="${t.pret}" style="width: 100%; padding: 10px; box-sizing: border-box; background: #222; border: 1px solid #444; color: white; border-radius: 5px;">
-                                    </div>
-                                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <span style="color: white; font-size: 15px; display: block;">Are opțiune de Minge?</span>
+                                    
+                                    <div class="formular-auth" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; flex: 1;">
+                                        
+                                        <div class="grup-input" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <label style="margin:0; font-weight:bold; color: ${terenDB.este_activ !== false ? '#22c55e' : '#ef4444'};">
+                                                    ${terenDB.este_activ !== false ? '✅ Terenul este Vizibil' : '❌ Terenul este Ascuns'}
+                                                </label>
+                                                <input type="checkbox" id="activ-${terenDB.id}" ${terenDB.este_activ !== false ? 'checked' : ''} style="width:20px;height:20px; cursor:pointer;">
+                                            </div>
+                                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #ccc;">Debifează pentru a ascunde complet terenul de clienți.</p>
                                         </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="minge-toggle-${idSafe}" ${t.optiune_minge ? 'checked' : ''} onchange="document.getElementById('container-pret-minge-${idSafe}').style.display = this.checked ? 'block' : 'none'">
-                                            <span class="slider round"></span>
-                                        </label>
-                                    </div>
-                                    <div id="container-pret-minge-${idSafe}" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: ${t.optiune_minge ? 'block' : 'none'};">
-                                        <label style="color: #ccc; font-size: 13px; display: block; margin-bottom: 5px;">Preț Închiriere Minge (RON/oră)</label>
-                                        <input type="number" id="pret-minge-${idSafe}" value="${t.pret_minge || 15}" style="width: 100%; padding: 10px; box-sizing: border-box; background: #222; border: 1px solid #444; color: white; border-radius: 5px;">
-                                    </div>
-                                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <span style="color: white; font-size: 15px; display: block;">Teren Activ</span>
-                                            <span style="color: #aaa; font-size: 12px;">Dacă e oprit, clienții nu pot rezerva.</span>
+
+                                        <div class="grup-input" style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                            <label style="color: #ef4444; font-weight: bold; font-size: 15px;">⛔ Blochează / Deblochează o zi</label>
+                                            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+                                                <input type="date" id="data-blocare-${terenDB.id}" style="background: rgba(0,0,0,0.5); color: white; padding: 8px; border-radius: 5px; flex: 1; min-width: 120px;">
+                                                <button type="button" onclick="blocheazaZiuaIntreaga('${terenDB.nume}', ${terenDB.id}, event)" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">Închide</button>
+                                                <button type="button" onclick="deblocheazaZiua('${terenDB.nume}', ${terenDB.id}, event)" style="background: #22c55e; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">Deblochează</button>
+                                            </div>
                                         </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="activ-${idSafe}" ${t.este_activ ? 'checked' : ''}>
-                                            <span class="slider round"></span>
-                                        </label>
+
+                                        <div class="grup-input" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; width: 100%; box-sizing: border-box;">
+                                            <label style="margin-bottom: 8px; display: block; color: #a1eafb;">📸 Schimbă Poza Terenului</label>
+                                            <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                                                <img src="${terenDB.poza || 'assets/imagini/default.png'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;">
+                                                <input type="file" id="poza-${terenDB.id}" accept="image/*" style="background: rgba(0,0,0,0.5); color: white; padding: 8px; border-radius: 5px; flex: 1; min-width: 0; cursor: pointer; border: 1px dashed rgba(255,255,255,0.2);">
+                                            </div>
+                                        </div>
+
+                                        <div class="grup-input"><label>Preț Teren (Lei)</label><input type="number" id="pret-${terenDB.id}" value="${terenDB.pret}"></div>
+                                        <div class="grup-input" style="display:flex; justify-content:space-between; margin-top:10px;"><label>Ofertă Minge?</label><input type="checkbox" id="minge-${terenDB.id}" ${terenDB.optiune_minge ? 'checked' : ''} style="width:20px;height:20px;"></div>
+                                        <div class="grup-input" style="margin-top:10px;"><label>Preț Minge (Lei)</label><input type="number" id="pret-minge-${terenDB.id}" value="${terenDB.pret_minge || 15}"></div>
+                                        <div class="grup-input" style="display:flex; justify-content:space-between; margin-top:10px; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                            <label style="color: #a1eafb; font-weight: bold;">💬 Activează Chat (pt acest teren)</label>
+                                            <input type="checkbox" id="are-chat-${terenDB.id}" ${terenDB.are_chat !== false ? 'checked' : ''} style="width:20px;height:20px; cursor: pointer;">
+                                        </div>
+                                        
+                                        <div style="flex: 1;"></div>
+                                        <button id="btn-save-${terenDB.id}" type="button" onclick="salveazaSetariTeren(${terenDB.id}, '${terenDB.nume}')" class="buton-rezervare" style="background: #3b82f6; margin-top: 15px;">💾 Salvează Setările pt ${terenDB.nume}</button>
                                     </div>
-                                    <button onclick="window.salveazaSetariTeren('${t.nume}', '${idSafe}')" style="width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">💾 Salvează Setările</button>
                                 </div>
                             </div>
                         `;
                     }
-
-                    if (selectManualTeren) {
-                        selectManualTeren.innerHTML += `<option value="${t.nume}">${t.nume}</option>`;
-                    }
+                }
+                
+                containerMeniu.innerHTML = htmlMeniu;
+                containerModale.innerHTML = htmlModale;
+                
+                // Reatașează observerul pentru scroll pe noile modale create
+                document.querySelectorAll('.modal').forEach(m => {
+                    observerModaleAdmin.observe(m, { attributes: true });
                 });
+            
+            // Reîncărcare automată tabel la selecție/login
+            const selectM = document.getElementById('tabel-teren');
+            if (selectM && terenuriPtTabel.length > 0) {
+                window.initializeazaTabel(terenuriPtTabel);
             }
-        }
-    }
 
-    document.querySelectorAll('.buton-inchidere').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const m = this.closest('.modal');
-            if (m) m.style.display = 'none';
-        });
-    });
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal').forEach(m => {
-                if (m.style.display !== 'none') m.style.display = 'none';
-            });
+            // Chat real-time pentru admin
+            setTimeout(() => { initializareRealtimeChatAdmin(); }, 1000);
+
+        } else {
+            alert("⛔ Ești logat, dar contul tău nu are profil de Admin setat în baza de date!");
+            await db.auth.signOut();
         }
+        btn.innerText = "Intră în Sistem";
     });
 
-    document.getElementById('admin-btn-istoric')?.addEventListener('click', () => {
-        document.getElementById('container-istoric').style.display = 'flex';
-        window.reincarcaIstoricAdmin();
+    window.blocheazaZiuaIntreaga = async function(numeTeren, idTeren, event) {
+        const dataInput = document.getElementById(`data-blocare-${idTeren}`).value;
+        if (!dataInput) return alert("Alege o dată din calendar mai întâi!");
+        const d = new Date(dataInput);
+        const zile = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+        const dataFormata = `${zile[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!confirm(`Ești sigur că blochezi complet terenul ${numeTeren} pe data de ${dataFormata}?`)) return;
+
+        const btn = event.target; const textVechi = btn.innerText; btn.innerText = "Se blochează..."; btn.disabled = true;
+        const ore = ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+        
+        const { data: oreExistente } = await db.from('rezervari').select('ora').eq('teren', numeTeren).eq('data_str', dataFormata).neq('stare', 'anulata');
+        const oreOcupate = oreExistente ? oreExistente.map(r => r.ora) : [];
+        
+        const oreDeBlocat = ore.filter(o => !oreOcupate.includes(o)).map(oraLibera => ({
+            sport: "Blocat", teren: numeTeren, data_str: dataFormata, ora: oraLibera,
+            pret_total: "0 Lei", email_client: "Teren Blocat", stare: 'activa', timestamp_start: Date.now()
+        }));
+
+        if (oreDeBlocat.length > 0) {
+            const { error } = await db.from('rezervari').insert(oreDeBlocat);
+            if (error) { alert("Eroare: " + error.message); btn.innerText = textVechi; btn.disabled = false; return; }
+        }
+        
+        alert(`✅ Ziua a fost blocată!`); btn.innerText = textVechi; btn.disabled = false;
+        if (typeof window.reincarcaIstoricAdmin === 'function') window.reincarcaIstoricAdmin(); 
+        if (typeof window.incarcaTabelProgram === 'function') window.incarcaTabelProgram(); 
+    };
+
+    window.deblocheazaZiua = async function(numeTeren, idTeren, event) {
+        const dataInput = document.getElementById(`data-blocare-${idTeren}`).value;
+        if (!dataInput) return alert("Alege o dată!");
+        const d = new Date(dataInput);
+        const zile = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+        const dataFormata = `${zile[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!confirm(`Deblochezi terenul ${numeTeren} pe ${dataFormata}?`)) return;
+
+        const btn = event.target; const textVechi = btn.innerText; btn.innerText = "Așteaptă..."; btn.disabled = true;
+        const { error } = await db.from('rezervari').delete().eq('teren', numeTeren).eq('data_str', dataFormata).eq('email_client', 'Teren Blocat');
+        if (!error) { 
+            alert(`✅ Ziua deblocată!`); 
+            if (typeof window.reincarcaIstoricAdmin === 'function') window.reincarcaIstoricAdmin(); 
+            if (typeof window.incarcaTabelProgram === 'function') window.incarcaTabelProgram(); 
+        } 
+        else alert("Eroare: " + error.message);
+        btn.innerText = textVechi; btn.disabled = false;
+    };
+
+    window.salveazaSetariTeren = async function(idDB, numeTeren) {
+        const btnSave = document.getElementById(`btn-save-${idDB}`);
+        if(btnSave) { btnSave.innerText = "⏳ Se salvează..."; btnSave.disabled = true; }
+
+        const pret = document.getElementById(`pret-${idDB}`).value;
+        const minge = document.getElementById(`minge-${idDB}`).checked;
+        const pretMinge = document.getElementById(`pret-minge-${idDB}`).value;
+        const esteActiv = document.getElementById(`activ-${idDB}`).checked;
+        const areChat = document.getElementById(`are-chat-${idDB}`) ? document.getElementById(`are-chat-${idDB}`).checked : true;
+        const fileInput = document.getElementById(`poza-${idDB}`);
+
+        let dateDeUpdatat = { pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), este_activ: esteActiv, are_chat: areChat };
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${ext}`;
+            
+            const { error: uploadError } = await db.storage.from('poze_terenuri').upload(fileName, file);
+                
+            if (uploadError) {
+                if(btnSave) { btnSave.innerText = `💾 Salvează Setările pt ${numeTeren}`; btnSave.disabled = false; }
+                return alert("Eroare la urcarea pozei: " + uploadError.message);
+            }
+            
+            const { data: publicUrlData } = db.storage.from('poze_terenuri').getPublicUrl(fileName);
+            dateDeUpdatat.poza = publicUrlData.publicUrl;
+        }
+
+        const { error } = await db.from('terenuri').update(dateDeUpdatat).eq('id', idDB);
+        
+        if (!error) { alert(`✅ Setări salvate!`); document.getElementById('login-admin-btn').click(); }
+        else alert("Eroare: " + error.message);
+        
+        if(btnSave) { btnSave.innerText = `💾 Salvează Setările pt ${numeTeren}`; btnSave.disabled = false; }
+    };
+
+    document.getElementById('btn-rezervare-manuala')?.addEventListener('click', async () => {
+        const selectBox = document.getElementById('manual-teren');
+        const terenAles = selectBox.value;
+        const sportAles = selectBox.options[selectBox.selectedIndex].getAttribute('data-sport');
+        const client = document.getElementById('manual-client').value.trim();
+        const dataInput = document.getElementById('manual-data').value;
+        const oraAlesa = document.getElementById('manual-ora').value;
+        const pret = document.getElementById('manual-pret').value.trim();
+        
+        if (!client || !dataInput || !pret) return alert("Completează câmpurile!");
+        const d = new Date(dataInput);
+        const zile = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+        const dataFormata = `${zile[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+        document.getElementById('btn-rezervare-manuala').innerText = "Se verifică...";
+        const { data: dublura } = await db.from('rezervari').select('id').eq('teren', terenAles).eq('data_str', dataFormata).eq('ora', oraAlesa).neq('stare', 'anulata');
+        if (dublura && dublura.length > 0) {
+            document.getElementById('btn-rezervare-manuala').innerText = window.lang === 'hu' ? "➕ Mentés" : "➕ Salvează";
+            return alert(`❌ Ora ${oraAlesa} pe ${dataFormata} este rezervată!`);
+        }
+
+        const { error } = await db.from('rezervari').insert([{
+            sport: sportAles, teren: terenAles, data_str: dataFormata, ora: oraAlesa,
+            pret_total: pret + (window.lang === 'hu' ? " RON (Kézi)" : " Lei (Manual)"), email_client: client, stare: 'activa', timestamp_start: Date.now()
+        }]);
+        if (!error) { 
+            alert("✅ Rezervare adăugată!"); 
+            if (typeof window.reincarcaIstoricAdmin === 'function') window.reincarcaIstoricAdmin(); 
+            if (typeof window.incarcaTabelProgram === 'function') window.incarcaTabelProgram(); 
+        } 
+        else alert("Eroare: " + error.message);
+        document.getElementById('btn-rezervare-manuala').innerText = window.lang === 'hu' ? "➕ Mentés" : "➕ Salvează";
     });
-    
-    document.getElementById('admin-inchide-istoric')?.addEventListener('click', () => {
-        document.getElementById('container-istoric').style.display = 'none';
+
+    document.getElementById('btn-adauga-teren')?.addEventListener('click', async () => {
+        const nume = document.getElementById('teren-nume').value.trim();
+        const sport = document.getElementById('teren-sport').value;
+        const pret = document.getElementById('teren-pret').value.trim();
+        const minge = document.getElementById('teren-minge').checked;
+        const pretMinge = document.getElementById('teren-pret-minge').value.trim();
+        const locatie = document.getElementById('teren-locatie').value.trim();
+        const fileInput = document.getElementById('teren-poza');
+
+        if (!nume || !pret || !locatie) return alert("Completează câmpurile!");
+        const btn = document.getElementById('btn-adauga-teren'); btn.innerText = "⏳ Se salvează..."; btn.disabled = true;
+
+        let urlPoza = null;
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const ext = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${ext}`;
+            
+            // Urcăm fișierul fizic în Storage (Bucket: poze_terenuri)
+            const { data: uploadData, error: uploadError } = await db.storage
+                .from('poze_terenuri')
+                .upload(fileName, file);
+                
+            if (uploadError) {
+                alert("Eroare la urcarea pozei: " + uploadError.message);
+                btn.innerText = "➕ Adaugă Teren"; btn.disabled = false; 
+                return;
+            }
+            
+            // Extragem link-ul public către poză
+            const { data: publicUrlData } = db.storage.from('poze_terenuri').getPublicUrl(fileName);
+            urlPoza = publicUrlData.publicUrl;
+        }
+
+        const { error } = await db.from('terenuri').insert([{
+            nume, sport, pret: parseInt(pret), optiune_minge: minge, pret_minge: parseInt(pretMinge), locatie, poza: urlPoza, este_activ: true
+        }]);
+        
+        if (error) alert("❌ Eroare DB: " + error.message);
+        else { alert("✅ Teren adăugat!"); window.incarcaTerenuriAdmin(); window.actualizeazaBifeTerenuri(); }
+        btn.innerText = "➕ Adaugă Teren"; btn.disabled = false;
+    });
+
+    document.getElementById('creeaza-supervisor-btn')?.addEventListener('click', async () => {
+        const nume = document.getElementById('super-nume').value.trim();
+        const email = document.getElementById('super-email').value.trim();
+        const esteSuper = document.getElementById('check-super-admin').checked;
+        const listaTerenuri = Array.from(document.querySelectorAll('.check-teren-alocat:checked')).map(cb => cb.value).join(','); 
+
+        if (!nume || !email) return alert("Completează numele și adresa de mail!");
+        if (!esteSuper && listaTerenuri === "") return alert("Bifează măcar un teren!");
+
+        const btn = document.getElementById('creeaza-supervisor-btn'); btn.innerText = "Se verifică...";
+        
+        // Verifică dacă adresa e deja alocată
+        const { data: verificare } = await db.from('users_admin').select('id').eq('email', email);
+        if (verificare && verificare.length > 0) { btn.innerText = "Alocă Terenuri"; return alert("❌ Acest E-mail este deja alocat unui angajat/admin!"); }
+
+        const { error } = await db.from('users_admin').insert([{ nume_admin: nume, email: email, is_super: esteSuper, terenuri: esteSuper ? "ALL" : listaTerenuri }]);
+        if (!error) { 
+            alert(`✅ Rol și Terenuri alocate cu succes! Nu uita să creezi parola pentru ${email} din contul tău Supabase.`); 
+            document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false); 
+            document.getElementById('super-nume').value = "";
+            document.getElementById('super-email').value = "";
+            document.getElementById('modal-creeaza-cont').style.display = 'none';
+        } else {
+            alert("Eroare: " + error.message);
+        }
+        btn.innerText = "Alocă Terenuri";
     });
 
     window.reincarcaIstoricAdmin = async function() {
-        const dataInceput = document.getElementById('filtru-data-inceput').value;
-        const dataSfarsit = document.getElementById('filtru-data-sfarsit').value;
-        const stareFiltru = document.getElementById('filtru-stare-rezervare').value;
-
-        const tableBody = document.querySelector('#tabel-rezervari tbody');
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">⏳ Se caută date...</td></tr>';
-
-        let query = db.from('rezervari').select('*');
-        if (dataInceput) query = query.gte('timestamp_start', new Date(dataInceput + 'T00:00:00').getTime());
-        if (dataSfarsit) query = query.lte('timestamp_start', new Date(dataSfarsit + 'T23:59:59').getTime());
+        const container = document.getElementById('container-istoric');
+        if (!container) return;
+        container.style.display = 'flex'; // Lista verticala cu scroll interior
+        container.innerHTML = "<p style='color: white; text-align: center;'>Se descarcă rezervările... ⏳</p>";
         
-        const { data, error } = await query;
-        tableBody.innerHTML = '';
+        // Preluăm clienții pentru a corela datele (nume, telefon) cu rezervările web
+        const { data: clientiDB } = await db.from('clienti').select('*');
+        const totiClientii = clientiDB || [];
 
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nu există rezervări în acest interval.</td></tr>';
-            return;
-        }
+        const { data, error } = await db.from('rezervari').select('*');
+        if (error || !data || data.length === 0) { container.innerHTML = "<p style='color: white;'>Nu există nicio rezervare în sistem.</p>"; return; }
+
+        data.sort((a, b) => b.id - a.id);
+        let html = ""; let rezervariGasite = 0;
 
         const terenurileLui = contLogatGlobal.is_super ? [] : (contLogatGlobal.terenuri ? contLogatGlobal.terenuri.split(',') : []);
         const acum = new Date();
@@ -209,6 +696,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         data.forEach(r => {
             if (!contLogatGlobal.is_super && !terenurileLui.includes(r.teren)) return;
+            rezervariGasite++;
 
             let esteTrecuta = false;
             const matchData = r.data_str.match(/\d{1,2}\.\d{1,2}/); 
@@ -228,185 +716,78 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const eAnulata = r.stare === 'anulata';
-            const eBlocata = (r.stare === 'blocata_admin');
-            
-            let stareFiltruFinal = 'active';
-            if (eBlocata) stareFiltruFinal = 'blocate';
-            else if (eAnulata) stareFiltruFinal = 'anulate';
-            else if (esteTrecuta) stareFiltruFinal = 'trecute';
-            
-            if (stareFiltru !== 'toate' && stareFiltru !== stareFiltruFinal) return;
+            const eBlocaj = r.email_client === 'Teren Blocat';
 
-            let badge = '';
-            let randOpacity = '1';
-            let butonActiune = '';
-            let randBg = 'transparent';
+            let culoareBorder = '#444'; let culoareTitlu = '#22c55e';
+            let textStare = `<span style="color: #22c55e; font-weight: bold;">[${txtActiva}]</span>`;
+            let butonAnulare = ''; let opacitate = '1';
 
-            if (eBlocata) {
-                badge = `<span style="background: #eab308; color: black; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${txtBlocata}</span>`;
-                butonActiune = `<button onclick="window.deblocheazaRezervare(${r.id})" style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Deblochează</button>`;
-                randBg = 'rgba(234, 179, 8, 0.1)';
-            } else if (eAnulata) {
-                badge = `<span style="background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${txtAnulata}</span>`;
-                randOpacity = '0.5';
-            } else if (esteTrecuta) {
-                badge = `<span style="background: #6b7280; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${txtFinalizata}</span>`;
-                randOpacity = '0.8';
+            if (eAnulata) { culoareBorder = '#ef4444'; culoareTitlu = '#ef4444'; opacitate = '0.7'; textStare = `<span style="color: #ef4444; font-weight: bold;">[${txtAnulata}]</span>`; } 
+            else if (eBlocaj) { culoareBorder = '#ef4444'; culoareTitlu = '#ef4444'; textStare = `<span style="color: #ef4444; font-weight: bold;">[${txtBlocata}]</span>`; } 
+            else if (esteTrecuta) { culoareBorder = '#6b7280'; culoareTitlu = '#9ca3af'; opacitate = '0.85'; textStare = `<span style="color: #9ca3af; font-weight: bold;">[${txtFinalizata}]</span>`; } 
+            else { butonAnulare = `<button onclick="anuleazaRezervareAdmin(${r.id})" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%;">${txtBtnAnuleaza}</button>`; }
+
+            const dataTradusa = (typeof window.traduData === 'function') ? window.traduData(r.data_str) : r.data_str;
+
+            let textClientAfisat = r.email_client;
+            let contGasit = totiClientii.find(c => c.email === r.email_client);
+            
+            if (contGasit) {
+                let infoClientList = [];
+                if(contGasit.nume) infoClientList.push(`Nume: ${contGasit.nume}`);
+                if(contGasit.telefon) infoClientList.push(`Tel: ${contGasit.telefon}`);
+                infoClientList.push(`Email: ${contGasit.email}`);
+                textClientAfisat = infoClientList.join(' | ');
+            } else if (!eBlocaj) {
+                textClientAfisat = `${r.email_client} (Manual)`;
             } else {
-                badge = `<span style="background: #22c55e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${txtActiva}</span>`;
-                butonActiune = `<button onclick="window.anuleazaRezervareAdmin(${r.id})" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">${txtBtnAnuleaza}</button>`;
+                textClientAfisat = "Sistem Blocare";
             }
-            
-            const btnChatClient = r.email_client !== 'BLOCAT_ADMIN' ? `<button onclick="window.deschideChatDinTabel('${r.email_client}', '${r.teren}', '${r.email_client.split('@')[0]}')" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 5px;">💬 Chat</button>` : '';
 
-            let idFormated = r.id.toString().padStart(4, '0');
-            const dataF = new Date(r.timestamp_start);
-            const dataPrint = `${dataF.getDate().toString().padStart(2, '0')}.${(dataF.getMonth() + 1).toString().padStart(2, '0')} ${dataF.getHours().toString().padStart(2, '0')}:${dataF.getMinutes().toString().padStart(2, '0')}`;
-
-            const dataTradusa = window.traduData ? window.traduData(r.data_str) : r.data_str;
-
-            const tr = document.createElement('tr');
-            tr.style.opacity = randOpacity;
-            tr.style.backgroundColor = randBg;
-            tr.innerHTML = `
-                <td>#${idFormated}</td>
-                <td>
-                    <div style="font-weight: bold;">${r.email_client}</div>
-                    <div style="font-size: 11px; color: #aaa;">Data facerii: ${dataPrint}</div>
-                    ${btnChatClient}
-                </td>
-                <td>${r.teren}</td>
-                <td>
-                    <div style="font-weight: bold;">${dataTradusa}</div>
-                    <div style="font-size: 12px; color: #3b82f6;">⏰ ${r.ora}</div>
-                </td>
-                <td><strong style="color: #22c55e;">${r.pret_total}</strong></td>
-                <td>${badge}</td>
-                <td>${butonActiune}</td>
-            `;
-            tableBody.appendChild(tr);
+            html += `
+                <div style="background: rgba(255,255,255,0.1); border: 1px solid ${culoareBorder}; padding: 15px; margin: 0; border-radius: 8px; color: white; opacity: ${opacitate}; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h4 style="margin: 0 0 10px 0; color: ${culoareTitlu};">⚽ ${r.sport} - ${r.teren} ${textStare}</h4>
+                        <p style="margin: 5px 0;"><strong>📅 ${txtCand}:</strong> ${dataTradusa} ( ${r.ora} )</p>
+                        <p style="margin: 5px 0; font-size: 13px;"><strong>👤 Client:</strong> ${textClientAfisat}</p>
+                        <p style="margin: 5px 0;"><strong>💰 ${txtPret}:</strong> ${r.pret_total}</p>
+                    </div>
+                    ${butonAnulare}
+                </div>`;
         });
+        
+        container.innerHTML = rezervariGasite === 0 ? "<p style='color: white;'>Nu există date.</p>" : html;
     };
-
-    document.getElementById('filtru-data-inceput')?.addEventListener('change', window.reincarcaIstoricAdmin);
-    document.getElementById('filtru-data-sfarsit')?.addEventListener('change', window.reincarcaIstoricAdmin);
-    document.getElementById('filtru-stare-rezervare')?.addEventListener('change', window.reincarcaIstoricAdmin);
-
-    window.anuleazaRezervareAdmin = async function(id) {
-        if(confirm("Sigur vrei să anulezi această rezervare? Clientul va pierde rezervarea!")) {
-            await db.from('rezervari').update({ stare: 'anulata' }).eq('id', id);
-            window.reincarcaIstoricAdmin();
-        }
-    };
-
-    window.deblocheazaRezervare = async function(id) {
-        if(confirm("Sigur vrei să deblochezi această oră? Clienții o vor putea rezerva din nou.")) {
-            await db.from('rezervari').delete().eq('id', id);
-            window.reincarcaIstoricAdmin();
-        }
-    };
-
-    document.getElementById('admin-btn-manual')?.addEventListener('click', () => {
-        document.getElementById('modal-adauga-manual').style.display = 'flex';
-    });
-
-    document.getElementById('btn-salveaza-manual')?.addEventListener('click', async () => {
-        const nume = document.getElementById('manual-nume').value.trim();
-        const teren = document.getElementById('manual-teren').value;
-        const dataZ = document.getElementById('manual-data').value;
-        const ora = document.getElementById('manual-ora').value;
-        const eBlocaj = document.getElementById('manual-blocaj').checked;
-        const pret = document.getElementById('manual-pret').value.trim();
-
-        if (!teren || !dataZ || !ora) return alert("Selectează teren, data și ora!");
-        if (!eBlocaj && !nume) return alert("Pune numele clientului (sau bifează Blocaj pentru a o bloca)!");
-
-        const btn = document.getElementById('btn-salveaza-manual');
-        btn.disabled = true; btn.innerText = "Se salvează...";
-
-        const numeZileT_DB = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
-        const d = new Date(dataZ);
-        const dataSelectataStr = `${numeZileT_DB[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
-
-        const { data: dublura } = await db.from('rezervari')
-            .select('id').eq('teren', teren).eq('data_str', dataSelectataStr).eq('ora', ora).neq('stare', 'anulata');
-
-        if (dublura && dublura.length > 0) {
-            btn.disabled = false; btn.innerText = "Adaugă";
-            return alert("❌ Această oră este DEJA ocupată / blocată!");
-        }
-
-        const { error } = await db.from('rezervari').insert([{
-            sport: '-', 
-            teren: teren, 
-            data_str: dataSelectataStr,
-            ora: ora, 
-            pret_total: eBlocaj ? "0 (Blocat Admin)" : (pret ? pret + " RON" : "Plătit / Custom"),
-            email_client: eBlocaj ? "BLOCAT_ADMIN" : nume,
-            stare: eBlocaj ? 'blocata_admin' : 'activa',
-            timestamp_start: Date.now()
-        }]);
-
-        if (error) {
-            alert("Eroare: " + error.message);
-        } else {
-            alert(eBlocaj ? "✅ Ora a fost blocată cu succes!" : "✅ Rezervare manuală adăugată cu succes!");
-            document.getElementById('modal-adauga-manual').style.display = 'none';
-        }
-        btn.disabled = false; btn.innerText = "Adaugă";
-    });
-
-    window.salveazaSetariTeren = async function(numeTeren, idSafe) {
-        const locatie = document.getElementById(`locatie-${idSafe}`).value;
-        const pret = document.getElementById(`pret-${idSafe}`).value;
-        const optiune_minge = document.getElementById(`minge-toggle-${idSafe}`).checked;
-        const pret_minge = document.getElementById(`pret-minge-${idSafe}`).value;
-        const este_activ = document.getElementById(`activ-${idSafe}`).checked;
-
-        const { error } = await db.from('terenuri').update({
-            locatie: locatie,
-            pret: pret,
-            optiune_minge: optiune_minge,
-            pret_minge: optiune_minge ? pret_minge : null,
-            este_activ: este_activ
-        }).eq('nume', numeTeren);
-
-        if (error) alert("❌ Eroare la salvare: " + error.message);
-        else alert(`✅ Setările pentru ${numeTeren} au fost salvate cu succes!`);
-    };
+    
+    document.getElementById('btn-istoric')?.addEventListener('click', window.reincarcaIstoricAdmin);
 
     // ==========================================
     // LOGICĂ CHAT ADMIN
     // ==========================================
-    const modalChatAdmin = document.getElementById('modal-chat-admin');
-    const btnVeziChatAdmin = document.getElementById('btn-vezi-chat-admin');
-    const btnInchideChatAdmin = document.getElementById('inchide-chat-admin');
-    const inputChatAdmin = document.getElementById('input-chat-admin');
-    const btnTrimiteChatAdmin = document.getElementById('btn-trimite-chat-admin');
-    
     let chatAdminRealtime = null;
-    let chatAdminConversatieCurenta = null; // { email, teren, nume }
     let chatAdminMesajeToate = [];
+    let chatAdminConversatieCurenta = null; // Un obiect { email_client, teren }
+    
+    const btnVeziChatAdmin = document.getElementById('btn-vezi-chat-admin');
+    const modalChatAdmin = document.getElementById('modal-chat-admin');
+    const inputChatAdmin = document.getElementById('chat-admin-input');
+    const btnTrimiteChatAdmin = document.getElementById('chat-admin-btn-trimite');
 
     btnVeziChatAdmin?.addEventListener('click', () => {
         modalChatAdmin.style.display = 'flex';
         incarcaMesajeAdmin();
     });
 
-    btnInchideChatAdmin?.addEventListener('click', () => {
-        modalChatAdmin.style.display = 'none';
-    });
-
     async function initializareRealtimeChatAdmin() {
         if (chatAdminRealtime) db.removeChannel(chatAdminRealtime);
+        if (!contLogatGlobal) return;
         
-        await incarcaMesajeAdmin(false);
+        await incarcaMesajeAdmin(false); 
         
+        // Adminul primește notificări pentru orice mesaj legat de terenurile lui
         chatAdminRealtime = db.channel('mesaje_chat_admin')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'mesaje_chat' }, payload => {
-                const terenMesaj = payload.new ? payload.new.teren : (payload.old ? payload.old.teren : null);
-                if (!terenMesaj) return;
-
+                const terenMesaj = payload.new ? payload.new.teren : null;
                 const terenurileAdmin = contLogatGlobal.is_super ? [] : (contLogatGlobal.terenuri ? contLogatGlobal.terenuri.split(',') : []);
                 
                 // Dacă adminul e superadmin SAU are acces la terenul din mesaj
@@ -431,6 +812,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!contLogatGlobal) return;
         
         let query = db.from('mesaje_chat').select('*').order('created_at', { ascending: true });
+        
         if (!contLogatGlobal.is_super) {
             const terenurileAdmin = contLogatGlobal.terenuri ? contLogatGlobal.terenuri.split(',') : [];
             query = query.in('teren', terenurileAdmin);
@@ -452,40 +834,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function randeazaListaConversatiiAdmin() {
-        const listaSide = document.getElementById('chat-admin-lista-clienti');
+        const listaSide = document.getElementById('chat-admin-lista-conversații');
         if (!listaSide) return;
-
-        // Grupăm mesajele unice per (email_client + teren)
-        let grupuri = {};
+        
+        // Grupăm conversațiile unice prin combinația (email_client + teren)
+        const conversatiiUniceMap = new Map();
+        
         chatAdminMesajeToate.forEach(m => {
             const cheie = `${m.email_client}|${m.teren}`;
-            if (!grupuri[cheie]) grupuri[cheie] = [];
-            grupuri[cheie].push(m);
+            if (!conversatiiUniceMap.has(cheie)) {
+                conversatiiUniceMap.set(cheie, { email: m.email_client, teren: m.teren, mesaje: [] });
+            }
+            conversatiiUniceMap.get(cheie).mesaje.push(m);
         });
 
-        const arrayGrupuri = Object.keys(grupuri).map(cheie => {
-            const [email, teren] = cheie.split('|');
-            const mesajeG = grupuri[cheie];
-            const ultimulTimp = mesajeG[mesajeG.length - 1].created_at;
-            const areNecitite = mesajeG.some(x => x.expeditor === 'client' && x.citit === false);
-            return { email, teren, mesaje: mesajeG, ultimulTimp, areNecitite };
+        const conversatii = Array.from(conversatiiUniceMap.values());
+        
+        // Sortăm conversațiile astfel încât cele cu mesaje necitite să fie sus, apoi după data ultimului mesaj
+        conversatii.sort((a, b) => {
+            const aNecitite = a.mesaje.some(m => m.expeditor === 'client' && !m.citit);
+            const bNecitite = b.mesaje.some(m => m.expeditor === 'client' && !m.citit);
+            if (aNecitite && !bNecitite) return -1;
+            if (!aNecitite && bNecitite) return 1;
+            
+            const ultimaDataA = new Date(a.mesaje[a.mesaje.length - 1].created_at).getTime();
+            const ultimaDataB = new Date(b.mesaje[b.mesaje.length - 1].created_at).getTime();
+            return ultimaDataB - ultimaDataA;
         });
 
-        arrayGrupuri.sort((a, b) => new Date(b.ultimulTimp) - new Date(a.ultimulTimp));
-
-        if (arrayGrupuri.length === 0) {
-            listaSide.innerHTML = '<p style="color: #ccc; font-size: 13px; text-align: center;">Nu există conversații active.</p>';
+        if (conversatii.length === 0) {
+            listaSide.innerHTML = '<p style="color: #ccc; font-size: 13px; text-align: center;">Nu există mesaje.</p>';
             return;
         }
 
+        // Preluăm clienții pentru a le afișa numele real
+        const { data: clientiDB } = await db.from('clienti').select('email, nume');
+        const clienti = clientiDB || [];
+
         listaSide.innerHTML = '';
         
-        for (const conv of arrayGrupuri) {
+        for (const conv of conversatii) {
             const ultimulMesaj = conv.mesaje[conv.mesaje.length - 1].mesaj;
-            const numeAfisat = conv.email.split('@')[0];
+            const areNecitite = conv.mesaje.some(m => m.expeditor === 'client' && m.citit === false);
+            
+            const contGasit = clienti.find(c => c.email === conv.email);
+            const numeAfisat = contGasit && contGasit.nume ? contGasit.nume : conv.email.split('@')[0];
             
             const card = document.createElement('div');
-            card.className = `card-conversatie ${conv.areNecitite ? 'necitit' : ''}`;
+            card.className = `card-conversatie ${areNecitite ? 'necitit' : ''}`;
             
             const esteSelectat = chatAdminConversatieCurenta && chatAdminConversatieCurenta.email === conv.email && chatAdminConversatieCurenta.teren === conv.teren;
             if (esteSelectat) card.style.borderColor = 'white';
